@@ -16,3 +16,22 @@ export const createTransaction = async (req, res) => {
         });
     }
 }
+
+export const getTransaction = async (req, res) => {
+    try {
+        const transactions = await Transaction.find()
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            count: transactions.length,
+            data: transactions
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch transactions",
+            error: error.message
+        });
+    }
+}
