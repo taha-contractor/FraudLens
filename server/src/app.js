@@ -1,5 +1,5 @@
 import express from "express";
-
+import transactionRoutes from "./routes/transaction.routes.js";
 const app = express();
 
 app.use(express.json());
@@ -8,4 +8,5 @@ app.get("/", (req, res) => {
         message: "FraudLens API is running successfully.",
     });
 });
+app.use("/api/transactions", transactionRoutes);
 export default app;
