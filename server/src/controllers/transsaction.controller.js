@@ -1,4 +1,10 @@
-import Transaction from "../models/Tramsaction.js";
+import Transaction from "../models/Transaction.js";
+import fs from "fs/promises";
+import {
+    parseTransactionCSV,
+    validateTransactionRecords,
+    importTransactionsToDatabase
+} from "../services/transaction-import.service.js";
 
 export const createTransaction = async (req, res) => {
     try {
@@ -60,3 +66,41 @@ export const getTransactionById = async (req, res) => {
         });
     }
 }
+
+export const importTransactions = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: "CSV file is required"
+            });
+        }
+
+        const records = await parseTransactionCSV(req.file.path);
+        const { validRecords, invalidRecords } = validateTransactionRecords(records);
+        const databaseResults = await importTransactionsToDatabase(validRecords);
+
+        await fs.unlink(req.file.path);
+        
+        res.status(200).json({
+            success: true,
+            message: "CSV parsed successfully",
+            summary: {
+                validRecords: validRecords.length,
+                invalidRecords: invalidRecords.length,
+                totalRecords: records.length,
+                inserted: databaseResults.inserted,
+                duplicates: databaseResults.duplicates,
+                failed: databaseResults.failed
+            },
+            invalidRecords,
+            errors: databaseResults.errors
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: "Failed to import transactions",
+            error: error.message
+        });
+    }
+};
