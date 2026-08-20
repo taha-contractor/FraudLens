@@ -1,10 +1,12 @@
 import Transaction from "../models/Transaction.js";
+import { analyzeTransaction } from "../services/fraud-analysis.service.js";
 import fs from "fs/promises";
 import {
     parseTransactionCSV,
     validateTransactionRecords,
     importTransactionsToDatabase
 } from "../services/transaction-import.service.js";
+// import { analyzeTransactionById } from "../services/fraud-analysis.service.js";
 
 export const createTransaction = async (req, res) => {
     try {
@@ -100,6 +102,34 @@ export const importTransactions = async (req, res) => {
         res.status(400).json({
             success: false,
             message: "Failed to import transactions",
+            error: error.message
+        });
+    }
+};
+
+export const analyzeTransactionById = async (res, req) => {
+    try {
+        const {id} = req.params;
+        const transaction = await Transaction.findOne({
+            transactionId: id
+        });
+
+        if (!transaction){
+            return res.status(404).json({
+                success: false,
+                message: "Transaction not found"
+            });
+        }
+
+        const analysis = await analyzeTransaction(transaction);
+        res.status(200).json({
+            success: true,
+            data: analysis
+        });
+    } catch(error) {
+        res.status(500).json({
+            success:false,
+            message: "Failed to analyze Transaction",
             error: error.message
         });
     }

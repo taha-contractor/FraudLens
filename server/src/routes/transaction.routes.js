@@ -3,7 +3,8 @@ import {
     createTransaction,
     getTransaction,
     getTransactionById,
-    importTransactions
+    importTransactions,
+    analyzeTransactionById
 } from "../controllers/transsaction.controller.js";
 import upload from "../middleware/upload.middleware.js";
 
@@ -16,6 +17,7 @@ router.post(
     upload.single("file"),
     importTransactions
 );
+router.get("/analyze/:id", analyzeTransactionById);
 router.get("/:id", getTransactionById);
 
 export default router;
