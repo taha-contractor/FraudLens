@@ -30,10 +30,17 @@ TRANSACTION_TYPES = [
 ]
 
 
-def generate_normal_transaction(transaction_id, account_id, base_date):
-    amount = round(random.uniform(500, 10000), 2)
+def generate_normal_transaction(
+    transaction_id,
+    account_id,
+    base_date
+):
+    amount = round(random.uniform(500, 30000), 2)
 
-    hour = random.randint(7, 21)
+    if random.random() < 0.85:
+        hour = random.randint(7, 21)
+    else:
+        hour = random.randint(0, 23)
 
     timestamp = base_date.replace(
         hour=hour,
@@ -41,41 +48,65 @@ def generate_normal_transaction(transaction_id, account_id, base_date):
         second=random.randint(0, 59)
     )
 
+    if random.random() < 0.90:
+        location = random.choice(NORMAL_LOCATIONS)
+    else:
+        location = random.choice(UNUSUAL_LOCATIONS)
+
+    if random.random() < 0.05:
+        amount = round(random.uniform(30000, 80000), 2)
+
     return {
         "transactionId": transaction_id,
         "accountId": account_id,
         "amount": amount,
         "transactionType": random.choice(TRANSACTION_TYPES),
-        "location": random.choice(NORMAL_LOCATIONS),
+        "location": location,
         "timestamp": timestamp.isoformat(),
         "fraudLabel": 0
     }
 
+def generate_fraud_transaction(
+    transaction_id,
+    account_id,
+    base_date
+):
+    amount = round(random.uniform(2000, 100000), 2)
+    hour = random.randint(0, 23)
+    location = random.choice(NORMAL_LOCATIONS)
 
-def generate_fraud_transaction(transaction_id, account_id, base_date):
     fraud_pattern = random.choice([
         "high_amount",
         "night",
         "unusual_location",
-        "combined"
+        "combined",
+        "subtle"
     ])
 
-    amount = round(random.uniform(5000, 15000), 2)
+    if fraud_pattern == "high_amount":
+        amount = round(random.uniform(60000, 150000), 2)
 
-    hour = random.randint(7, 21)
-
-    location = random.choice(NORMAL_LOCATIONS)
-
-    if fraud_pattern in ["high_amount", "combined"]:
-        amount = round(random.uniform(50000, 200000), 2)
-
-    if fraud_pattern in ["night", "combined"]:
+    elif fraud_pattern == "night":
         hour = random.choice([
             0, 1, 2, 3, 4, 5, 23
         ])
 
-    if fraud_pattern in ["unusual_location", "combined"]:
+    elif fraud_pattern == "unusual_location":
         location = random.choice(UNUSUAL_LOCATIONS)
+
+    elif fraud_pattern == "combined":
+        amount = round(random.uniform(40000, 120000), 2)
+
+        hour = random.choice([
+            0, 1, 2, 3, 4, 5, 23
+        ])
+
+        location = random.choice(UNUSUAL_LOCATIONS)
+
+    elif fraud_pattern == "subtle":
+        amount = round(random.uniform(5000, 25000), 2)
+        hour = random.randint(7, 21)
+        location = random.choice(NORMAL_LOCATIONS)
 
     timestamp = base_date.replace(
         hour=hour,
@@ -92,7 +123,6 @@ def generate_fraud_transaction(transaction_id, account_id, base_date):
         "timestamp": timestamp.isoformat(),
         "fraudLabel": 1
     }
-
 
 def generate_dataset():
     transactions = []
