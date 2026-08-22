@@ -1,17 +1,17 @@
 import pandas as pd
 
-
 INPUT_FILE = "ml/data/fraud_transactions.csv"
 OUTPUT_FILE = "ml/data/fraud_features.csv"
-
 
 def create_features(df):
     df = df.copy()
 
-    # Convert timestamp
     df["timestamp"] = pd.to_datetime(df["timestamp"])
 
-    # Time-based features
+    df = df.sort_values(
+        ["accountId", "timestamp"]
+    ).reset_index(drop=True)
+
     df["transactionHour"] = df["timestamp"].dt.hour
 
     df["isNightTransaction"] = (
@@ -19,37 +19,57 @@ def create_features(df):
         | (df["transactionHour"] < 6)
     ).astype(int)
 
-    # High-value transaction
     df["isHighValue"] = (
         df["amount"] >= 50000
     ).astype(int)
 
-    # Account behavioral features
-    account_stats = (
+    df["transactionCount"] = (
+        df.groupby("accountId")
+        .cumcount()
+    )
+
+    df["previousTotalAmount"] = (
         df.groupby("accountId")["amount"]
-        .agg(
-            transactionCount="count",
-            averageAmount="mean",
-            maximumAmount="max"
+        .cumsum()
+        - df["amount"]
+    )
+
+    df["averageAmount"] = (
+        df["previousTotalAmount"]
+        / df["transactionCount"]
+    )
+
+    df["averageAmount"] = (
+        df["averageAmount"]
+        .fillna(0)
+    )
+
+    df["previousMaximumAmount"] = (
+        df.groupby("accountId")["amount"]
+        .transform(
+            lambda x: x.shift(1).cummax()
         )
-        .reset_index()
     )
 
-    df = df.merge(
-        account_stats,
-        on="accountId",
-        how="left"
+    df["previousMaximumAmount"] = (
+        df["previousMaximumAmount"]
+        .fillna(0)
     )
 
-    # Amount deviation
-    df["amountDeviation"] = (
-        df["amount"] / df["averageAmount"]
+    df["amountDeviation"] = 0.0
+
+    has_history = df["averageAmount"] > 0
+
+    df.loc[has_history, "amountDeviation"] = (
+        df.loc[has_history, "amount"]
+        / df.loc[has_history, "averageAmount"]
     )
 
     return df
 
 
 def main():
+
     print("Loading dataset...")
 
     df = pd.read_csv(INPUT_FILE)
@@ -63,7 +83,7 @@ def main():
         index=False
     )
 
-    print("\nFeature engineering completed.")
+    print("\nTemporal feature engineering completed.")
 
     print(f"Output rows: {len(features)}")
 
@@ -72,23 +92,24 @@ def main():
     print(
         features[
             [
+                "transactionId",
+                "accountId",
                 "amount",
                 "transactionHour",
                 "isNightTransaction",
                 "isHighValue",
                 "transactionCount",
                 "averageAmount",
-                "maximumAmount",
+                "previousMaximumAmount",
                 "amountDeviation",
                 "fraudLabel"
             ]
-        ].head()
+        ].head(10)
     )
 
     print(
         f"\nSaved to: {OUTPUT_FILE}"
     )
-
 
 if __name__ == "__main__":
     main()
