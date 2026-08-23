@@ -52,6 +52,9 @@ def main():
         "averageAmount",
         "previousMaximumAmount",
         "amountDeviation",
+        "transactionsLastHour",
+        "transactionsLast24Hours",
+        "amountLastHour",
         "transactionType",
         "location"
     ]
@@ -77,7 +80,10 @@ def main():
         "transactionCount",
         "averageAmount",
         "previousMaximumAmount",
-        "amountDeviation"
+        "amountDeviation",
+        "transactionsLastHour",
+        "transactionsLast24Hours",
+        "amountLastHour"
     ]
 
     preprocessor = ColumnTransformer(

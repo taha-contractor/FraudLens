@@ -65,6 +65,102 @@ def create_features(df):
         / df.loc[has_history, "averageAmount"]
     )
 
+        # -------------------------------------------------
+    # Velocity features
+    # -------------------------------------------------
+
+    df["transactionsLastHour"] = 0
+    df["transactionsLast24Hours"] = 0
+    df["amountLastHour"] = 0.0
+
+    for account_id, account_df in df.groupby("accountId"):
+
+        account_df = account_df.sort_values(
+            "timestamp"
+        )
+
+        timestamps = (
+            account_df["timestamp"]
+            .tolist()
+        )
+
+        amounts = (
+            account_df["amount"]
+            .tolist()
+        )
+
+        indices = (
+            account_df.index.tolist()
+        )
+
+        for position in range(
+            len(account_df)
+        ):
+
+            current_time = timestamps[position]
+
+            one_hour_start = (
+                current_time
+                - pd.Timedelta(hours=1)
+            )
+
+            twenty_four_hour_start = (
+                current_time
+                - pd.Timedelta(hours=24)
+            )
+
+            previous_timestamps = (
+                timestamps[:position]
+            )
+
+            previous_amounts = (
+                amounts[:position]
+            )
+
+            transactions_last_hour = 0
+            transactions_last_24_hours = 0
+            amount_last_hour = 0.0
+
+            for previous_position in range(
+                position
+            ):
+
+                previous_time = (
+                    previous_timestamps[
+                        previous_position
+                    ]
+                )
+
+                previous_amount = (
+                    previous_amounts[
+                        previous_position
+                    ]
+                )
+
+                if previous_time >= one_hour_start:
+                    transactions_last_hour += 1
+                    amount_last_hour += previous_amount
+
+                if previous_time >= twenty_four_hour_start:
+                    transactions_last_24_hours += 1
+
+            row_index = indices[position]
+
+            df.loc[
+                row_index,
+                "transactionsLastHour"
+            ] = transactions_last_hour
+
+            df.loc[
+                row_index,
+                "transactionsLast24Hours"
+            ] = transactions_last_24_hours
+
+            df.loc[
+                row_index,
+                "amountLastHour"
+            ] = amount_last_hour
+
     return df
 
 

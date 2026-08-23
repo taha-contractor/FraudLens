@@ -37,6 +37,9 @@ def main():
         "averageAmount",
         "previousMaximumAmount",
         "amountDeviation",
+        "transactionsLastHour",
+        "transactionsLast24Hours",
+        "amountLastHour",
         "transactionType",
         "location"
     ]
@@ -61,7 +64,10 @@ def main():
         "transactionCount",
         "averageAmount",
         "previousMaximumAmount",
-        "amountDeviation"
+        "amountDeviation",
+        "transactionsLastHour",
+        "transactionsLast24Hours",
+        "amountLastHour"
     ]
 
     preprocessor = ColumnTransformer(
@@ -127,6 +133,7 @@ def main():
     print("\n===== ROC-AUC =====")
     auc = roc_auc_score(y_test, probabilities)
     print(f"ROC-AUC: {auc:.4f}")
+
 
 if __name__ == "__main__":
     main()
