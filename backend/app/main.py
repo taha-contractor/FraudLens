@@ -1,11 +1,17 @@
+import sys
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.core.database import connect_to_mongo, close_mongo_connection, is_db_connected
 from app.routes.cases import router as cases_router
+from app.routes.entities import router as entities_router
+from app.routes.accounts import router as accounts_router
+from app.routes.relationships import router as relationships_router
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -14,6 +20,21 @@ logger = logging.getLogger("fraudlens.main")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Handle Windows asyncio connection reset error log noise cleanly
+    if sys.platform == "win32":
+        try:
+            loop = asyncio.get_running_loop()
+
+            def silence_win_connection_reset(loop, context):
+                exc = context.get("exception")
+                if isinstance(exc, ConnectionResetError):
+                    return
+                loop.default_exception_handler(context)
+
+            loop.set_exception_handler(silence_win_connection_reset)
+        except Exception:
+            pass
+
     logger.info("Starting up FraudLens FastAPI Backend...")
     try:
         await connect_to_mongo()
@@ -29,6 +50,15 @@ app = FastAPI(
     description="AI-powered financial fraud investigation system backend API",
     version="1.0.0",
     lifespan=lifespan,
+)
+
+# Enable CORS for all origins, methods, and headers
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -89,4 +119,8 @@ async def health_check():
     }
 
 
+# Include Routers
 app.include_router(cases_router)
+app.include_router(entities_router)
+app.include_router(accounts_router)
+app.include_router(relationships_router)
