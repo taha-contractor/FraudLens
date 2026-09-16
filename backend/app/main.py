@@ -12,6 +12,7 @@ from app.routes.cases import router as cases_router
 from app.routes.entities import router as entities_router
 from app.routes.accounts import router as accounts_router
 from app.routes.relationships import router as relationships_router
+from app.routes.transactions import router as transactions_router
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -124,3 +125,4 @@ app.include_router(cases_router)
 app.include_router(entities_router)
 app.include_router(accounts_router)
 app.include_router(relationships_router)
+app.include_router(transactions_router)

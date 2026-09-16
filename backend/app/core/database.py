@@ -51,6 +51,15 @@ async def connect_to_mongo():
         await relationships_col.create_index("targetEntityId")
         logger.info("Indexes ensured in 'relationships' collection")
 
+        # 5. Transactions indexes
+        transactions_col = db.db.get_collection("transactions")
+        await transactions_col.create_index("transactionId", unique=True)
+        await transactions_col.create_index("caseId")
+        await transactions_col.create_index("accountId")
+        await transactions_col.create_index("destinationAccountId")
+        await transactions_col.create_index([("caseId", 1), ("timestamp", -1)])
+        logger.info("Indexes ensured in 'transactions' collection")
+
     except Exception as e:
         logger.error(f"Failed to connect to MongoDB: {str(e)}")
         raise e
@@ -87,6 +96,11 @@ async def get_accounts_collection():
 async def get_relationships_collection():
     database = await get_database()
     return database.get_collection("relationships")
+
+
+async def get_transactions_collection():
+    database = await get_database()
+    return database.get_collection("transactions")
 
 
 async def is_db_connected() -> bool:
