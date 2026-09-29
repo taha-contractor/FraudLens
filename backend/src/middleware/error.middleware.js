@@ -29,6 +29,11 @@ export const errorHandler = (err, req, res, next) => {
         },
     };
 
+    // Optional field-level validation details (kept within the same error shape).
+    if (isExpected && Array.isArray(err.details) && err.details.length > 0) {
+        body.error.details = err.details;
+    }
+
     // Stack traces are only exposed in local development.
     if (process.env.NODE_ENV !== "production" && err.stack) {
         body.error.stack = err.stack;
