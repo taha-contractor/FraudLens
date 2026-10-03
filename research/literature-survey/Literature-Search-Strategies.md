@@ -2,150 +2,98 @@
 
 ## 1. Search Objective
 
-The literature search aims to identify and study existing research on technologies and approaches used in financial fraud detection and investigation.
+We will search for research papers related to financial fraud detection and financial fraud investigation.
 
-The search will focus on methods, technologies, capabilities, limitations, and findings relevant to the FraudLens research questions.
+The main purpose of the search is to understand how existing systems detect fraud, analyse financial transactions, study relationships between entities, and handle investigation documents and evidence.
 
-The literature survey will provide the primary academic evidence for the subsequent technology comparison, gap analysis, and technology applicability assessment.
-
----
-
-## 2. Research Question Mapping
-
-| Research Question | Literature Search Focus                                                                                                |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| RQ1               | Technologies and approaches used in financial fraud detection and investigation                                        |
-| RQ2               | Transaction analysis, anomaly detection, entity relationships, evidence handling, investigation support, and reporting |
-| RQ3               | Functional and technical limitations of existing approaches                                                            |
-| RQ4               | Technologies and approaches that may address identified gaps                                                           |
-| RQ5               | Applicability of selected technologies to an enhanced financial fraud investigation system                             |
+From the relevant papers, we will select **2–3 papers for detailed study**. These papers will help us understand the existing approaches, their results, and their limitations.
 
 ---
 
-## 3. Search Areas
+## 2. Research Areas
 
-The literature search will be divided into the following research areas:
+We will mainly search papers related to the following areas:
 
-### 3.1 Financial Fraud Detection
+### 2.1 Financial Fraud Detection
 
-Keywords:
+* Machine learning for fraud detection
+* Anomaly detection
+* Behavioural analysis
+* Fraud classification
 
-* financial fraud detection
-* banking fraud detection
-* financial crime detection
-* fraud detection machine learning
-* financial fraud machine learning
-* fraud anomaly detection
-* financial anomaly detection
-* behavioral fraud detection
+### 2.2 Transaction and Entity Analysis
 
-### 3.2 Financial Transaction Analysis
+* Financial transaction analysis
+* Suspicious transaction detection
+* Transaction patterns
+* Transaction networks
+* Entity relationships
+* Graph-based fraud analysis
+* Fund-flow analysis
 
-Keywords:
+### 2.3 Document and Evidence Analysis
 
-* financial transaction analysis
-* transaction fraud detection
-* suspicious transaction detection
-* transaction pattern analysis
-* transaction behavior analysis
-* transaction anomaly detection
-* transaction velocity fraud
-* temporal fraud detection
+* Financial document processing
+* OCR
+* Information extraction
+* Document search
+* Evidence retrieval
 
-### 3.3 Entity and Relationship Analysis
+### 2.4 AI-Assisted Investigation
 
-Keywords:
-
-* financial fraud graph analysis
-* graph-based fraud detection
-* financial transaction network
-* fraud network analysis
-* entity relationship fraud detection
-* entity resolution financial fraud
-* money flow analysis
-* financial network analysis
-
-### 3.4 Document and Evidence Analysis
-
-Keywords:
-
-* financial document analysis
-* financial document information extraction
-* OCR financial documents
-* document intelligence financial investigation
-* evidence retrieval financial investigation
-* financial evidence analysis
-* document processing fraud investigation
-
-### 3.5 AI-Assisted Investigation
-
-Keywords:
-
-* AI financial fraud investigation
-* artificial intelligence fraud investigation
-* large language models financial investigation
-* LLM financial fraud
-* retrieval augmented generation financial investigation
-* RAG financial documents
-* AI-assisted financial investigation
-* agentic AI financial investigation
-
-### 3.6 Investigation Support and Reporting
-
-Keywords:
-
-* financial fraud investigation system
-* financial crime investigation technology
-* fraud investigation workflow
-* financial investigation case management
-* fraud investigation analytics
-* financial fraud investigation reporting
-* investigation decision support financial crime
+* AI in financial fraud investigation
+* Large Language Models
+* RAG
+* Evidence-based question answering
+* AI-assisted investigation
 
 ---
 
-## 4. Search Query Strategy
+## 3. Search Keywords
 
-Search queries will combine the main research concept with a specific technology or investigation capability.
+We will use different combinations of keywords while searching for papers.
 
-Examples:
+### Financial Fraud
 
-### Fraud Detection
-
-* "financial fraud detection" AND "machine learning"
-* "financial fraud detection" AND "anomaly detection"
+* "financial fraud detection"
+* "financial fraud" AND "machine learning"
+* "financial fraud" AND "anomaly detection"
 * "financial fraud" AND "behavioral analysis"
 
 ### Transaction Analysis
 
-* "financial transaction analysis" AND fraud
-* "suspicious transaction detection" AND machine learning
-* "transaction anomaly detection" AND financial fraud
+* "financial transaction analysis"
+* "suspicious transaction detection"
+* "transaction anomaly detection"
+* "transaction pattern analysis"
 
-### Graph Analysis
+### Graph and Entity Analysis
 
 * "financial fraud" AND "graph analysis"
 * "financial fraud detection" AND "graph-based"
-* "financial transaction network" AND fraud
+* "financial transaction network"
+* "entity relationship" AND financial fraud
 
 ### Document Analysis
 
-* "financial fraud investigation" AND OCR
+* "financial fraud investigation" AND "document analysis"
 * "financial documents" AND "information extraction"
-* "financial evidence" AND document analysis
+* "financial evidence" AND retrieval
 
-### AI-Assisted Investigation
+### AI Investigation
 
 * "financial fraud investigation" AND "large language model"
 * "financial investigation" AND RAG
 * "financial fraud" AND "retrieval augmented generation"
-* "AI-assisted investigation" AND financial crime
+* "AI-assisted financial investigation"
+
+The keywords may be changed or combined differently depending on the search results.
 
 ---
 
-## 5. Database Search Approach
+## 4. Sources
 
-The following academic sources will be used:
+We will search mainly through:
 
 * IEEE Xplore
 * ACM Digital Library
@@ -153,113 +101,116 @@ The following academic sources will be used:
 * SpringerLink
 * Google Scholar
 
-Searches will be adapted to the syntax and capabilities of each database.
+Priority will be given to research papers from reliable academic sources.
 
-Priority will be given to peer-reviewed academic research and sources that directly contribute to the FraudLens research questions.
+We may also refer to official government, regulatory, or technology documentation when information about a particular system or technology is required.
 
 ---
 
-## 6. Initial Screening Process
+## 5. Selecting Papers
 
-Search results will be screened in the following order:
+We will first look at the title and abstract of the papers found during the search.
 
-```text
-Search Results
-      ↓
-Title Screening
-      ↓
-Abstract Screening
-      ↓
-Relevance Assessment
-      ↓
-Full-Text Review
-      ↓
-Selection Criteria
-      ↓
-Selected Papers
-      ↓
-Literature Extraction
-```
+A paper will be considered if it is relevant to financial fraud detection or investigation and provides useful information about its approach or results.
 
-A paper will not be included solely because its title contains a relevant keyword.
+From the relevant papers, we will select **2–3 main papers** for detailed study.
 
-The abstract and, where necessary, the full paper will be reviewed to determine its relevance to the FraudLens research questions.
+The selected papers should help us understand:
+
+* What problem the authors addressed
+* What method they used
+* What data they used
+* What results they obtained
+* What limitations they mentioned
+* How the work is related to FraudLens
+
+We will not select papers just to increase the number of references.
+
+---
+
+## 6. Studying the Selected Papers
+
+The selected papers will be read and understood properly.
+
+For each paper, we will note:
+
+| Point       | What we will study                   |
+| ----------- | ------------------------------------ |
+| Problem     | What problem does the paper address? |
+| Approach    | How did the authors solve it?        |
+| Technology  | What models or techniques were used? |
+| Dataset     | What data was used?                  |
+| Results     | What were the main results?          |
+| Limitations | What limitations were found?         |
+| Relevance   | How is it related to FraudLens?      |
+
+Important information will also be noted with the relevant page, section, table, or figure so that it can be checked later.
 
 ---
 
 ## 7. Search Record
 
-For each search session, the following information should be recorded:
+We will maintain a simple record of the papers searched and selected.
 
-| Field            | Description                                                 |
-| ---------------- | ----------------------------------------------------------- |
-| Database         | IEEE, ACM, ScienceDirect, Springer, Google Scholar          |
-| Search Date      | Date on which the search was performed                      |
-| Search Query     | Exact query used                                            |
-| Research Area    | Fraud detection, transaction analysis, graph analysis, etc. |
-| Results Reviewed | Approximate number of results screened                      |
-| Papers Selected  | Number of papers selected for further review                |
-| Notes            | Important observations                                      |
-
----
-
-## 8. Search and Selection Principles
-
-The literature search will follow these principles:
-
-1. Searches will cover all defined research areas.
-2. Multiple keyword combinations will be used to reduce dependence on a single search query.
-3. Relevant foundational research may be included even if it is older.
-4. Recent research will be considered for rapidly evolving technologies such as LLMs, RAG, and agent-based systems.
-5. Duplicate papers will be identified and removed.
-6. Papers will be selected based on relevance and source quality rather than search ranking alone.
-7. Findings will be recorded using the Literature Extraction Table.
-8. Important claims will be supported by the corresponding paper and evidence location.
-9. Technology selection will not be predetermined before completing the relevant research.
-10. Research findings, limitations reported by authors, and conclusions drawn during comparative analysis will be clearly distinguished.
+| Field         | Details                                                |
+| ------------- | ------------------------------------------------------ |
+| Database      | IEEE / ACM / ScienceDirect / Springer / Google Scholar |
+| Date          | Date of search                                         |
+| Search Query  | Keywords used                                          |
+| Research Area | Area of the search                                     |
+| Paper         | Paper found                                            |
+| Selected      | Yes / No                                               |
+| Reason        | Reason for selection or rejection                      |
 
 ---
 
-## 9. Expected Output
+## 8. How the Research Will Be Used
 
-The literature search is expected to produce:
+After studying the selected papers, we will compare their approaches and limitations.
 
-* A structured collection of relevant research papers.
-* A completed Literature Extraction Table.
-* Identification of commonly used technologies and approaches.
-* Identification of reported limitations.
-* Evidence supporting the comparison of approaches.
-* Inputs for the subsequent gap analysis.
-* Evidence for assessing the applicability of technologies to FraudLens.
+This will help us understand:
+
+* What existing systems already do
+* What problems they solve
+* What problems are still not properly addressed
+* Which technologies are useful for our project
+* What can realistically be implemented in FraudLens
+
+The research gap will be decided **after studying the papers**, rather than deciding the gap beforehand.
 
 ---
 
-## 10. Relationship to FraudLens Development
+## 9. Expected Result
 
-The literature survey will be completed before finalizing the major technology choices for the enhanced FraudLens prototype.
+The literature search should give us:
 
-The intended research flow is:
+* 2–3 properly studied research papers
+* Understanding of existing fraud detection and investigation approaches
+* Their important methods and results
+* Their limitations
+* A basis for identifying the research gap
+* A basis for deciding the technologies to be used in FraudLens
+
+---
+
+## 10. Research Flow
 
 ```text
-Literature Survey
+Search for Papers
        ↓
-Understand Existing Approaches
+Check Relevant Papers
        ↓
-Identify Capabilities
+Select 2–3 Papers
        ↓
-Identify Limitations
+Read and Understand
        ↓
-Compare Approaches
+Note Methods, Results and Limitations
        ↓
-Identify Research Gaps
+Compare the Papers
        ↓
-Evaluate Possible Technologies
+Identify the Research Gap
        ↓
-Assess Applicability
+Decide Suitable Technologies
        ↓
-Select Technologies
-       ↓
-Design FraudLens Prototype
+Design FraudLens
 ```
-
-Technology choices such as machine learning, graph analysis, OCR, RAG, LLMs, or agent-based systems will therefore be supported by the findings of the research rather than assumed in advance.
