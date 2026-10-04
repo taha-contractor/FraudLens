@@ -2,47 +2,50 @@
 
 ## 1. Overview
 
-This document defines the database and data model for FraudLens, an evidence-grounded AI financial fraud investigation system.
+FraudLens uses a case-centered MongoDB data model to store and manage the information required for financial fraud investigation.
 
-The data model is derived from the finalized:
+The database supports:
 
-* Research findings
-* Research gaps
-* Technology selection
-* System requirements
-* System architecture
+- Investigation cases
+- Users and investigators
+- Documents
+- Transactions
+- Financial accounts
+- Investigation entities
+- Entity relationships
+- Evidence
+- Investigation sessions
+- Findings
+- Audit logs
 
-The database design is centered around the **investigation case**.
+The database is designed for the B.Tech major project and focuses on simplicity, security, traceability, and practical implementation.
 
-Documents, transactions, accounts, entities, relationships, evidence, investigations, findings, and audit activities must remain associated with the appropriate case.
+The main principle is:
 
-The primary application database is **MongoDB**.
-
-The architecture is designed so that graph-oriented data and retrieval-oriented data can later be implemented using specialized technologies without changing the logical investigation model.
+> Every investigation-related record must remain associated with the correct case.
 
 ---
 
-# 2. Database Design Objectives
+# 2. Database Objectives
 
-The database must support the following objectives:
+The database must support:
 
-1. Store investigation cases.
-2. Store and manage case participants.
-3. Store uploaded investigation documents.
-4. Store financial transactions.
-5. Store financial accounts.
-6. Store investigation entities.
-7. Store relationships between entities and financial objects.
-8. Preserve evidence provenance.
-9. Store investigator and AI investigation sessions.
-10. Store analytical and AI-generated findings.
-11. Support investigator review.
-12. Maintain strict case-level isolation.
-13. Support transaction and temporal analysis.
-14. Support graph and fund-flow analysis.
-15. Support document retrieval and RAG.
-16. Support auditability.
-17. Support future integration with specialized graph and vector databases.
+1. User management
+2. Case management
+3. Case-level access control
+4. Document management
+5. Transaction management
+6. Account management
+7. Entity management
+8. Relationship analysis
+9. Evidence provenance
+10. Investigation queries
+11. AI-assisted investigations
+12. Findings and investigator review
+13. Fund-flow analysis
+14. Temporal analysis
+15. Audit logging
+16. Future RAG integration
 
 ---
 
@@ -50,130 +53,114 @@ The database must support the following objectives:
 
 ## Primary Database
 
-**MongoDB**
+MongoDB is used as the primary application database.
 
-MongoDB is used as the primary application database because the investigation domain contains heterogeneous and evolving records such as:
+MongoDB is suitable because FraudLens contains different types of investigation data such as:
 
-* documents
-* transactions
-* entities
-* evidence
-* findings
-* investigation sessions
+- Cases
+- Documents
+- Transactions
+- Accounts
+- Entities
+- Relationships
+- Evidence
+- Findings
+- Investigation sessions
 
-The schema should therefore remain flexible enough to accommodate different investigation data structures.
+The schema should remain flexible enough to support the evolving investigation requirements.
 
 ---
 
 # 4. Collection Overview
 
-FraudLens uses the following logical collections:
+FraudLens uses the following MongoDB collections:
 
-```text
-MongoDB
-│
-├── users
-├── cases
-├── documents
-├── transactions
-├── accounts
-├── entities
-├── relationships
-├── evidence
-├── investigations
-├── findings
-└── auditLogs
-```
+    MongoDB
+    |
+    +-- users
+    |
+    +-- cases
+    |
+    +-- documents
+    |
+    +-- transactions
+    |
+    +-- accounts
+    |
+    +-- entities
+    |
+    +-- relationships
+    |
+    +-- evidence
+    |
+    +-- investigations
+    |
+    +-- findings
+    |
+    +-- auditLogs
 
-Each collection has a specific responsibility.
+## Collection Responsibilities
 
-| Collection       | Responsibility                                                     |
-| ---------------- | ------------------------------------------------------------------ |
-| `users`          | User identity, role and authentication-related information         |
-| `cases`          | Investigation case information                                     |
-| `documents`      | Uploaded document metadata and processing status                   |
-| `transactions`   | Financial transaction records                                      |
-| `accounts`       | Financial account information                                      |
-| `entities`       | People, companies, banks and other investigation entities          |
-| `relationships`  | Connections between entities, accounts, transactions and documents |
-| `evidence`       | Traceable evidence extracted from investigation sources            |
-| `investigations` | Investigator questions, AI sessions and investigation activities   |
-| `findings`       | Analytical and AI-generated findings requiring review              |
-| `auditLogs`      | Security and investigation activity records                        |
+| Collection | Responsibility |
+|---|---|
+| users | User identity, authentication and role |
+| cases | Investigation case information |
+| documents | Uploaded document metadata and processing status |
+| transactions | Financial transaction records |
+| accounts | Financial account information |
+| entities | People, companies and other investigation entities |
+| relationships | Connections between entities and financial objects |
+| evidence | Traceable investigation evidence |
+| investigations | Investigator and AI investigation sessions |
+| findings | Analytical findings and investigator review |
+| auditLogs | Security and investigation activity |
 
 ---
 
 # 5. Case-Centered Data Model
 
-The case is the central object in the FraudLens data model.
+The Case is the central object in the FraudLens database.
 
-```text
-Case
-│
-├── Users / Investigators
-│
-├── Documents
-│   └── Evidence
-│
-├── Transactions
-│   └── Accounts
-│
-├── Entities
-│   └── Relationships
-│
-├── Investigations
-│
-├── Findings
-│
-└── Audit Logs
-```
+    Case
+     |
+     +-- Users / Investigators
+     |
+     +-- Documents
+     |      |
+     |      +-- Evidence
+     |
+     +-- Transactions
+     |      |
+     |      +-- Accounts
+     |
+     +-- Entities
+     |      |
+     |      +-- Relationships
+     |
+     +-- Investigations
+     |
+     +-- Findings
+     |
+     +-- Audit Logs
 
-Conceptually:
+All case-related collections must contain a `caseId` field.
 
-```text
-User
- │
- │ participates in
- ▼
-Case
- │
- ├── has ──> Document
- │             │
- │             └── produces ──> Evidence
- │
- ├── has ──> Transaction
- │             │
- │             └── involves ──> Account
- │
- ├── has ──> Entity
- │             │
- │             └── connected through ──> Relationship
- │
- ├── has ──> Investigation
- │
- ├── has ──> Finding
- │
- └── has ──> AuditLog
-```
+This provides the foundation for case isolation.
 
 ---
 
-# 6. Common Data Fields
+# 6. Common Fields
 
-Case-related collections should use common metadata where applicable.
+Where applicable, collections should contain:
 
-Typical fields include:
-
-```text
-_id
-caseId
-createdAt
-updatedAt
-```
+    _id
+    caseId
+    createdAt
+    updatedAt
 
 The exact fields depend on the collection.
 
-The `caseId` field is particularly important because it enables case-level authorization and data isolation.
+The `caseId` field is especially important because it allows the backend to restrict queries to the authorized investigation case.
 
 ---
 
@@ -181,53 +168,47 @@ The `caseId` field is particularly important because it enables case-level autho
 
 Collection:
 
-```text
-users
-```
+    users
 
-Purpose:
+## Purpose
 
-Stores FraudLens application users and their roles.
+Stores FraudLens application users.
 
-### Logical schema
+## Schema
 
-```text
-User
-├── _id
-├── name
-├── email
-├── passwordHash
-├── role
-├── isActive
-├── createdAt
-└── updatedAt
-```
+    User
+     |
+     +-- _id
+     +-- name
+     +-- email
+     +-- passwordHash
+     +-- role
+     +-- isActive
+     +-- createdAt
+     +-- updatedAt
 
-### Fields
+## Fields
 
-| Field          | Type     | Description                      |
-| -------------- | -------- | -------------------------------- |
-| `_id`          | ObjectId | Unique user identifier           |
-| `name`         | String   | User name                        |
-| `email`        | String   | Unique login email               |
-| `passwordHash` | String   | Hashed authentication credential |
-| `role`         | String   | User role                        |
-| `isActive`     | Boolean  | Whether account is active        |
-| `createdAt`    | Date     | Creation timestamp               |
-| `updatedAt`    | Date     | Last update timestamp            |
+| Field | Type | Description |
+|---|---|---|
+| `_id` | ObjectId | Unique user identifier |
+| `name` | String | User name |
+| `email` | String | Login email |
+| `passwordHash` | String | Hashed password |
+| `role` | String | User role |
+| `isActive` | Boolean | Account status |
+| `createdAt` | Date | Creation time |
+| `updatedAt` | Date | Last update time |
 
-### Roles
+## Roles
 
-Conceptual roles:
+For the B.Tech prototype:
 
-```text
-ADMIN
-INVESTIGATOR
-REVIEWER
-AUDITOR
-```
+    ADMIN
+    INVESTIGATOR
+    REVIEWER
 
-Role permissions should be implemented at the backend authorization layer.
+The exact permissions are enforced by the backend authorization layer.
 
 ---
 
@@ -235,68 +216,70 @@ Role permissions should be implemented at the backend authorization layer.
 
 Collection:
 
-```text
-cases
-```
+    cases
 
-Purpose:
+## Purpose
 
 Stores investigation cases.
 
-### Logical schema
+## Schema
 
-```text
-Case
-├── _id
-├── caseNumber
-├── title
-├── description
-├── status
-├── createdBy
-├── investigators
-├── createdAt
-└── updatedAt
-```
+    Case
+     |
+     +-- _id
+     +-- caseNumber
+     +-- title
+     +-- description
+     +-- status
+     +-- createdBy
+     +-- investigators
+     +-- createdAt
+     +-- updatedAt
 
-### Fields
+## Fields
 
-| Field           | Type            | Description                    |
-| --------------- | --------------- | ------------------------------ |
-| `_id`           | ObjectId        | Internal MongoDB identifier    |
-| `caseNumber`    | String          | Human-readable case identifier |
-| `title`         | String          | Case title                     |
-| `description`   | String          | Case description               |
-| `status`        | String          | Case status                    |
-| `createdBy`     | ObjectId        | User who created the case      |
-| `investigators` | Array<ObjectId> | Users associated with the case |
-| `createdAt`     | Date            | Creation timestamp             |
-| `updatedAt`     | Date            | Last update timestamp          |
+| Field | Type | Description |
+|---|---|---|
+| `_id` | ObjectId | Case identifier |
+| `caseNumber` | String | Human-readable case number |
+| `title` | String | Case title |
+| `description` | String | Case description |
+| `status` | String | Current case status |
+| `createdBy` | ObjectId | User who created the case |
+| `investigators` | ObjectId[] | Users assigned to the case |
+| `createdAt` | Date | Creation time |
+| `updatedAt` | Date | Last update time |
 
-Example:
+## Example
 
-```json
-{
-  "caseNumber": "CASE-2026-014",
-  "title": "Suspicious Fund Transfer Investigation",
-  "status": "OPEN"
-}
-```
+    {
+      "caseNumber": "CASE-2026-001",
+      "title": "Suspicious Fund Transfer Investigation",
+      "description": "Investigation of unusual transactions.",
+      "status": "OPEN",
+      "createdBy": "USER_ID",
+      "investigators": ["USER_ID"]
+    }
 
 ---
 
 # 9. Case Status
 
-Possible case states:
+Possible case statuses:
 
-```text
-OPEN
-UNDER_INVESTIGATION
-UNDER_REVIEW
-CLOSED
-ARCHIVED
-```
+    OPEN
+    UNDER_INVESTIGATION
+    UNDER_REVIEW
+    CLOSED
+    ARCHIVED
 
-The exact workflow can be refined during implementation.
+For the initial prototype, the main statuses can be:
+
+    OPEN
+    UNDER_INVESTIGATION
+    CLOSED
+
+Additional statuses can be introduced when required.
 
 ---
 
@@ -304,68 +287,91 @@ The exact workflow can be refined during implementation.
 
 Collection:
 
-```text
-documents
-```
+    documents
 
-Purpose:
+## Purpose
 
 Stores metadata about uploaded investigation documents.
 
-The actual binary file may be stored separately depending on the final storage architecture.
+The actual file can be stored using local/private file storage or object storage.
 
-### Logical schema
+MongoDB stores the document metadata and processing information.
 
-```text
-Document
-├── _id
-├── caseId
-├── fileName
-├── documentType
-├── mimeType
-├── fileSize
-├── storageReference
-├── processingStatus
-├── pageCount
-├── checksum
-├── uploadedBy
-├── createdAt
-└── updatedAt
-```
+## Schema
 
-### Fields
+    Document
+     |
+     +-- _id
+     +-- caseId
+     +-- fileName
+     +-- documentType
+     +-- mimeType
+     +-- fileSize
+     +-- storageReference
+     +-- processingStatus
+     +-- pageCount
+     +-- checksum
+     +-- uploadedBy
+     +-- createdAt
+     +-- updatedAt
 
-| Field              | Type     | Description               |
-| ------------------ | -------- | ------------------------- |
-| `_id`              | ObjectId | Document identifier       |
-| `caseId`           | ObjectId | Associated case           |
-| `fileName`         | String   | Original file name        |
-| `documentType`     | String   | Document category         |
-| `mimeType`         | String   | MIME type                 |
-| `fileSize`         | Number   | File size                 |
-| `storageReference` | String   | File storage reference    |
-| `processingStatus` | String   | Processing state          |
-| `pageCount`        | Number   | Number of pages           |
-| `checksum`         | String   | File integrity identifier |
-| `uploadedBy`       | ObjectId | Uploading user            |
-| `createdAt`        | Date     | Upload timestamp          |
-| `updatedAt`        | Date     | Last update               |
+## Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `_id` | ObjectId | Document identifier |
+| `caseId` | ObjectId | Associated case |
+| `fileName` | String | Original file name |
+| `documentType` | String | Document category |
+| `mimeType` | String | MIME type |
+| `fileSize` | Number | File size |
+| `storageReference` | String | Private file location/reference |
+| `processingStatus` | String | Current processing status |
+| `pageCount` | Number | Number of pages |
+| `checksum` | String | File integrity hash |
+| `uploadedBy` | ObjectId | User who uploaded the file |
+| `createdAt` | Date | Upload time |
+| `updatedAt` | Date | Last update time |
 
 ---
 
 # 11. Document Processing Status
 
-Possible states:
+Possible statuses:
 
-```text
-UPLOADED
-VALIDATING
-PROCESSING
-OCR_COMPLETED
-EXTRACTED
-INDEXED
-FAILED
-```
+    UPLOADED
+    VALIDATING
+    PROCESSING
+    OCR_COMPLETED
+    EXTRACTED
+    INDEXED
+    FAILED
+
+Typical flow:
+
+    UPLOADED
+        |
+        v
+    VALIDATING
+        |
+        v
+    PROCESSING
+        |
+        v
+    EXTRACTED
+        |
+        v
+    INDEXED
+
+For scanned documents:
+
+    PROCESSING
+        |
+        v
+    OCR_COMPLETED
+        |
+        v
+    EXTRACTED
 
 ---
 
@@ -373,1378 +379,1628 @@ FAILED
 
 Collection:
 
-```text
-transactions
-```
+    transactions
 
-Purpose:
+## Purpose
 
-Stores financial transaction records used for transaction analysis, anomaly detection, temporal analysis and fund-flow analysis.
+Stores financial transactions used for:
 
-### Logical schema
+- Transaction analysis
+- Risk analysis
+- Behavioral analysis
+- Temporal analysis
+- Fund-flow analysis
+- ML processing
 
-```text
-Transaction
-├── _id
-├── caseId
-├── transactionId
-├── accountId
-├── destinationAccountId
-├── amount
-├── currency
-├── transactionType
-├── merchant
-├── location
-├── timestamp
-├── status
-├── fraudProbability
-├── riskLevel
-├── fraudPrediction
-├── sourceDocumentId
-├── createdAt
-└── updatedAt
-```
+## Schema
 
----
+    Transaction
+     |
+     +-- _id
+     +-- caseId
+     +-- transactionId
+     +-- sourceAccountId
+     +-- destinationAccountId
+     +-- amount
+     +-- currency
+     +-- transactionType
+     +-- description
+     +-- merchant
+     +-- location
+     +-- timestamp
+     +-- status
+     +-- riskScore
+     +-- riskLevel
+     +-- modelPrediction
+     +-- createdAt
+     +-- updatedAt
 
-# 13. Transaction Fields
+## Fields
 
-| Field                  | Type            | Description                                      |
-| ---------------------- | --------------- | ------------------------------------------------ |
-| `_id`                  | ObjectId        | Internal identifier                              |
-| `caseId`               | ObjectId        | Investigation case                               |
-| `transactionId`        | String          | External/business transaction identifier         |
-| `accountId`            | ObjectId/String | Source account                                   |
-| `destinationAccountId` | ObjectId/String | Destination account where applicable             |
-| `amount`               | Number          | Transaction amount                               |
-| `currency`             | String          | Currency code                                    |
-| `transactionType`      | String          | Type of transaction                              |
-| `merchant`             | String          | Merchant or counterparty information             |
-| `location`             | String/Object   | Transaction location                             |
-| `timestamp`            | Date            | Transaction timestamp                            |
-| `status`               | String          | Transaction status                               |
-| `fraudProbability`     | Number          | Model-generated risk probability where available |
-| `riskLevel`            | String          | Analytical risk category                         |
-| `fraudPrediction`      | Boolean         | Model prediction where applicable                |
-| `sourceDocumentId`     | ObjectId        | Source document if applicable                    |
-| `createdAt`            | Date            | Creation timestamp                               |
-| `updatedAt`            | Date            | Last update                                      |
-
-Model outputs must be treated as analytical signals and not automatically as confirmed fraud findings.
-
----
-
-# 14. Accounts Collection
-
-Collection:
-
-```text
-accounts
-```
-
-Purpose:
-
-Represents financial accounts involved in an investigation.
-
-### Logical schema
-
-```text
-Account
-├── _id
-├── caseId
-├── accountNumberMasked
-├── accountType
-├── bankEntityId
-├── ownerEntityIds
-├── currency
-├── status
-├── sourceDocumentIds
-├── createdAt
-└── updatedAt
-```
-
-Sensitive account identifiers should be handled according to the security requirements.
-
-Where possible, sensitive values should not be unnecessarily exposed to the frontend or logs.
+| Field | Type | Description |
+|---|---|---|
+| `_id` | ObjectId | MongoDB identifier |
+| `caseId` | ObjectId | Investigation case |
+| `transactionId` | String | External transaction identifier |
+| `sourceAccountId` | ObjectId | Sending account |
+| `destinationAccountId` | ObjectId | Receiving account |
+| `amount` | Number | Transaction amount |
+| `currency` | String | Currency code |
+| `transactionType` | String | Transaction type |
+| `description` | String | Transaction description |
+| `merchant` | String | Merchant/counterparty |
+| `location` | String/Object | Transaction location |
+| `timestamp` | Date | Transaction time |
+| `status` | String | Transaction status |
+| `riskScore` | Number | Model-generated risk score |
+| `riskLevel` | String | LOW, MEDIUM or HIGH |
+| `modelPrediction` | Boolean | Model prediction |
+| `createdAt` | Date | Creation time |
+| `updatedAt` | Date | Last update time |
 
 ---
 
-# 15. Entities Collection
+# 13. Transaction Example
 
-Collection:
+    {
+      "caseId": "CASE_ID",
+      "transactionId": "TXN-001",
+      "sourceAccountId": "ACCOUNT_A",
+      "destinationAccountId": "ACCOUNT_B",
+      "amount": 500000,
+      "currency": "INR",
+      "transactionType": "TRANSFER",
+      "description": "Business transfer",
+      "timestamp": "2026-09-15T14:30:00Z",
+      "status": "COMPLETED",
+      "riskScore": 0.87,
+      "riskLevel": "HIGH",
+      "modelPrediction": true
+    }
 
-```text
-entities
-```
+Model outputs are analytical signals.
 
-Purpose:
-
-Stores investigation entities.
-
-Possible entity types:
-
-```text
-PERSON
-COMPANY
-BANK
-ACCOUNT
-LOCATION
-MERCHANT
-OTHER
-```
-
-### Logical schema
-
-```text
-Entity
-├── _id
-├── caseId
-├── entityType
-├── name
-├── aliases
-├── identifiers
-├── attributes
-├── sourceDocumentIds
-├── resolutionStatus
-├── confidence
-├── createdAt
-└── updatedAt
-```
+A model prediction must not automatically become a confirmed fraud finding.
 
 ---
 
-# 16. Entity Resolution Fields
-
-The entity model should support potential matching across different records.
-
-Example:
-
-```json
-{
-  "entityType": "COMPANY",
-  "name": "ABC Private Limited",
-  "aliases": [
-    "ABC Pvt Ltd",
-    "ABC PVT. LTD."
-  ],
-  "resolutionStatus": "REVIEW_REQUIRED",
-  "confidence": 0.91
-}
-```
-
-A high matching score does not automatically prove that two records represent the same real-world entity.
-
----
-
-# 17. Relationships Collection
-
-Collection:
-
-```text
-relationships
-```
-
-Purpose:
-
-Represents relationships between entities and other investigation objects.
-
-### Logical schema
-
-```text
-Relationship
-├── _id
-├── caseId
-├── sourceType
-├── sourceId
-├── relationshipType
-├── targetType
-├── targetId
-├── attributes
-├── confidence
-├── evidenceIds
-├── createdAt
-└── updatedAt
-```
-
-Example:
-
-```json
-{
-  "caseId": "CASE_ID",
-  "sourceType": "ENTITY",
-  "sourceId": "ENTITY_A",
-  "relationshipType": "OWNS",
-  "targetType": "ACCOUNT",
-  "targetId": "ACCOUNT_A"
-}
-```
-
----
-
-# 18. Relationship Types
-
-Potential relationships include:
-
-```text
-OWNS
-CONTROLS
-BELONGS_TO
-TRANSFERS_TO
-ASSOCIATED_WITH
-MENTIONED_IN
-LINKED_TO
-DIRECTOR_OF
-EMPLOYEE_OF
-LOCATED_AT
-```
-
-The relationship vocabulary should remain controlled to avoid inconsistent graph construction.
-
----
-
-# 19. Evidence Collection
-
-Collection:
-
-```text
-evidence
-```
-
-Purpose:
-
-Stores traceable evidence extracted from documents, transactions, relationships, or other investigation sources.
-
-### Logical schema
-
-```text
-Evidence
-├── _id
-├── caseId
-├── evidenceType
-├── sourceType
-├── sourceId
-├── documentId
-├── pageNumber
-├── section
-├── sourceText
-├── extractedData
-├── extractionMethod
-├── confidence
-├── hash
-├── createdAt
-└── updatedAt
-```
-
----
-
-# 20. Evidence Provenance
-
-Evidence must preserve its origin.
-
-Example:
-
-```text
-Finding
-   │
-   └── Evidence
-         │
-         ├── documentId
-         ├── pageNumber
-         ├── section
-         └── sourceText
-```
-
-This enables an investigator to move from a finding back to the original source.
-
----
-
-# 21. Evidence Types
-
-Potential evidence types:
-
-```text
-DOCUMENT_TEXT
-TRANSACTION
-ACCOUNT_ACTIVITY
-ENTITY_RECORD
-RELATIONSHIP
-MODEL_SIGNAL
-TIMELINE_EVENT
-FUND_FLOW
-```
-
-Evidence generated by analytical models should remain distinguishable from original source evidence.
-
----
-
-# 22. Investigations Collection
-
-Collection:
-
-```text
-investigations
-```
-
-Purpose:
-
-Stores investigation sessions and investigator/AI queries.
-
-### Logical schema
-
-```text
-Investigation
-├── _id
-├── caseId
-├── userId
-├── query
-├── queryType
-├── toolCalls
-├── retrievedEvidenceIds
-├── response
-├── status
-├── createdAt
-└── updatedAt
-```
-
----
-
-# 23. Investigation Query Types
-
-Possible query types:
-
-```text
-DOCUMENT_SEARCH
-TRANSACTION_SEARCH
-ENTITY_SEARCH
-RELATIONSHIP_SEARCH
-FUND_FLOW
-TIMELINE
-GENERAL_INVESTIGATION
-```
-
-The classification may later be performed automatically by the AI investigation layer.
-
----
-
-# 24. Investigation Tool Calls
-
-Tool calls should be recorded for auditability.
-
-Example:
-
-```json
-{
-  "tool": "traceFundFlow",
-  "parameters": {
-    "accountId": "ACCOUNT_A",
-    "maxDepth": 4
-  },
-  "resultReference": "RESULT_ID"
-}
-```
-
-The agent should not be allowed to bypass backend authorization when invoking a tool.
-
----
-
-# 25. Findings Collection
-
-Collection:
-
-```text
-findings
-```
-
-Purpose:
-
-Stores analytical and AI-generated findings for investigator review.
-
-### Logical schema
-
-```text
-Finding
-├── _id
-├── caseId
-├── title
-├── claim
-├── entityIds
-├── transactionIds
-├── evidenceIds
-├── analyticalSignals
-├── modelRisk
-├── confidence
-├── contradictions
-├── unresolvedQuestions
-├── status
-├── createdBy
-├── reviewedBy
-├── reviewNotes
-├── reviewedAt
-├── createdAt
-└── updatedAt
-```
-
----
-
-# 26. Finding Status
+# 14. Transaction Status
 
 Possible statuses:
 
-```text
-OPEN
-UNDER_REVIEW
-CONFIRMED
-REJECTED
-FOLLOW_UP_REQUIRED
-```
-
-The `CONFIRMED` status represents investigator review and must not simply mean that an ML model predicted fraud.
+    PENDING
+    COMPLETED
+    FAILED
+    REVERSED
+    CANCELLED
 
 ---
 
-# 27. Analytical Signals
+# 15. Transaction Risk Level
 
-A finding may contain analytical signals such as:
+Possible risk levels:
 
-```json
-{
-  "signalType": "BEHAVIORAL_DEVIATION",
-  "description": "Transaction amount significantly differs from historical account behavior",
-  "source": "ML_ANALYSIS"
-}
-```
+    LOW
+    MEDIUM
+    HIGH
 
-Possible signal categories include:
-
-```text
-HIGH_VALUE
-BEHAVIORAL_DEVIATION
-HIGH_VELOCITY
-UNUSUAL_TIME
-UNUSUAL_COUNTERPARTY
-NETWORK_PATTERN
-TEMPORAL_PATTERN
-MODEL_RISK
-```
+Risk level is generated by the analytical layer based on available rules, ML signals, or other investigation logic.
 
 ---
 
-# 28. Contradictions and Unresolved Questions
+# 16. Accounts Collection
 
-Findings should support conflicting or incomplete information.
+Collection:
+
+    accounts
+
+## Purpose
+
+Represents financial accounts involved in an investigation.
+
+## Schema
+
+    Account
+     |
+     +-- _id
+     +-- caseId
+     +-- accountNumberMasked
+     +-- accountType
+     +-- bankEntityId
+     +-- ownerEntityIds
+     +-- currency
+     +-- status
+     +-- createdAt
+     +-- updatedAt
+
+## Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `_id` | ObjectId | Account identifier |
+| `caseId` | ObjectId | Investigation case |
+| `accountNumberMasked` | String | Masked account number |
+| `accountType` | String | Account type |
+| `bankEntityId` | ObjectId | Associated bank entity |
+| `ownerEntityIds` | ObjectId[] | Account owner entities |
+| `currency` | String | Account currency |
+| `status` | String | Account status |
+| `createdAt` | Date | Creation time |
+| `updatedAt` | Date | Last update time |
+
+Sensitive account information should not be unnecessarily exposed.
+
+---
+
+# 17. Account Status
+
+Possible statuses:
+
+    ACTIVE
+    INACTIVE
+    CLOSED
+    UNKNOWN
+
+---
+
+# 18. Entities Collection
+
+Collection:
+
+    entities
+
+## Purpose
+
+Stores people, organizations, companies, banks, merchants, locations, and other entities involved in an investigation.
+
+## Schema
+
+    Entity
+     |
+     +-- _id
+     +-- caseId
+     +-- entityType
+     +-- name
+     +-- aliases
+     +-- identifiers
+     +-- attributes
+     +-- resolutionStatus
+     +-- confidence
+     +-- createdAt
+     +-- updatedAt
+
+## Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `_id` | ObjectId | Entity identifier |
+| `caseId` | ObjectId | Investigation case |
+| `entityType` | String | Type of entity |
+| `name` | String | Primary name |
+| `aliases` | String[] | Alternative names |
+| `identifiers` | Object | Available identifiers |
+| `attributes` | Object | Additional attributes |
+| `resolutionStatus` | String | Entity resolution state |
+| `confidence` | Number | Matching confidence where applicable |
+| `createdAt` | Date | Creation time |
+| `updatedAt` | Date | Last update time |
+
+---
+
+# 19. Entity Types
+
+Possible entity types:
+
+    PERSON
+    COMPANY
+    BANK
+    ACCOUNT
+    MERCHANT
+    LOCATION
+    ORGANIZATION
+    OTHER
+
+---
+
+# 20. Entity Resolution
+
+Entity resolution identifies potentially matching records.
 
 Example:
 
-```json
-{
-  "contradictions": [
-    "Transaction description differs between two source documents."
-  ],
-  "unresolvedQuestions": [
-    "Ownership of destination account requires further verification."
-  ]
-}
-```
+    ABC Traders Pvt Ltd
+    ABC Traders
+    ABC Traders Private Limited
+
+may refer to the same organization.
+
+Possible matching signals:
+
+- Name similarity
+- Address
+- Phone number
+- Email
+- Account information
+- Transaction relationships
+- Document references
+
+The system should store confidence rather than automatically treating a match as confirmed.
+
+---
+
+# 21. Entity Resolution Status
+
+Possible statuses:
+
+    UNREVIEWED
+    MATCHED
+    REVIEW_REQUIRED
+    REJECTED
+
+Example:
+
+    {
+      "entityType": "COMPANY",
+      "name": "ABC Private Limited",
+      "aliases": [
+        "ABC Pvt Ltd",
+        "ABC PVT. LTD."
+      ],
+      "resolutionStatus": "REVIEW_REQUIRED",
+      "confidence": 0.91
+    }
+
+---
+
+# 22. Relationships Collection
+
+Collection:
+
+    relationships
+
+## Purpose
+
+Stores connections between entities, accounts, transactions, and documents.
+
+## Schema
+
+    Relationship
+     |
+     +-- _id
+     +-- caseId
+     +-- sourceType
+     +-- sourceId
+     +-- relationshipType
+     +-- targetType
+     +-- targetId
+     +-- attributes
+     +-- confidence
+     +-- evidenceIds
+     +-- createdAt
+     +-- updatedAt
+
+## Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `_id` | ObjectId | Relationship identifier |
+| `caseId` | ObjectId | Investigation case |
+| `sourceType` | String | Source object type |
+| `sourceId` | ObjectId | Source object |
+| `relationshipType` | String | Type of relationship |
+| `targetType` | String | Target object type |
+| `targetId` | ObjectId | Target object |
+| `attributes` | Object | Additional relationship information |
+| `confidence` | Number | Relationship confidence |
+| `evidenceIds` | ObjectId[] | Supporting evidence |
+| `createdAt` | Date | Creation time |
+| `updatedAt` | Date | Last update time |
+
+---
+
+# 23. Relationship Types
+
+Initial controlled relationship types:
+
+    OWNS
+    CONTROLS
+    TRANSFERS_TO
+    ASSOCIATED_WITH
+    MENTIONED_IN
+    LINKED_TO
+    DIRECTOR_OF
+    EMPLOYEE_OF
+    LOCATED_AT
+
+The relationship vocabulary should remain controlled so that the investigation graph remains consistent.
+
+---
+
+# 24. Evidence Collection
+
+Collection:
+
+    evidence
+
+## Purpose
+
+Stores traceable evidence used to support investigation findings.
+
+Evidence can originate from:
+
+- Documents
+- Transactions
+- Accounts
+- Entities
+- Relationships
+- ML analysis
+- Fund-flow analysis
+- Timeline analysis
+
+## Schema
+
+    Evidence
+     |
+     +-- _id
+     +-- caseId
+     +-- evidenceType
+     +-- sourceType
+     +-- sourceId
+     +-- documentId
+     +-- pageNumber
+     +-- section
+     +-- sourceText
+     +-- extractedData
+     +-- extractionMethod
+     +-- confidence
+     +-- createdAt
+     +-- updatedAt
+
+---
+
+# 25. Evidence Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `_id` | ObjectId | Evidence identifier |
+| `caseId` | ObjectId | Investigation case |
+| `evidenceType` | String | Type of evidence |
+| `sourceType` | String | Source category |
+| `sourceId` | ObjectId/String | Original source |
+| `documentId` | ObjectId | Related document |
+| `pageNumber` | Number | Document page |
+| `section` | String | Relevant section |
+| `sourceText` | String | Extracted source text |
+| `extractedData` | Object | Structured extracted information |
+| `extractionMethod` | String | OCR, extraction, transaction, analysis etc. |
+| `confidence` | Number | Extraction/analysis confidence |
+| `createdAt` | Date | Creation time |
+| `updatedAt` | Date | Last update time |
+
+---
+
+# 26. Evidence Types
+
+Possible evidence types:
+
+    DOCUMENT_TEXT
+    TRANSACTION
+    ACCOUNT_ACTIVITY
+    ENTITY_RECORD
+    RELATIONSHIP
+    MODEL_SIGNAL
+    TIMELINE_EVENT
+    FUND_FLOW
+
+Original source evidence and model-generated evidence should remain distinguishable.
+
+---
+
+# 27. Evidence Provenance
+
+Evidence must preserve its source.
+
+Example:
+
+    Finding
+       |
+       +-- Evidence
+              |
+              +-- documentId
+              +-- pageNumber
+              +-- section
+              +-- sourceText
+
+This allows an investigator to trace a finding back to its source.
+
+---
+
+# 28. Investigations Collection
+
+Collection:
+
+    investigations
+
+## Purpose
+
+Stores investigation sessions and investigator/AI queries.
+
+## Schema
+
+    Investigation
+     |
+     +-- _id
+     +-- caseId
+     +-- userId
+     +-- query
+     +-- queryType
+     +-- toolCalls
+     +-- retrievedEvidenceIds
+     +-- response
+     +-- status
+     +-- createdAt
+     +-- updatedAt
+
+## Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `_id` | ObjectId | Investigation identifier |
+| `caseId` | ObjectId | Investigation case |
+| `userId` | ObjectId | User who initiated investigation |
+| `query` | String | Investigation question |
+| `queryType` | String | Query category |
+| `toolCalls` | Array | Tools used by AI |
+| `retrievedEvidenceIds` | ObjectId[] | Evidence retrieved |
+| `response` | String | Investigation response |
+| `status` | String | Investigation status |
+| `createdAt` | Date | Creation time |
+| `updatedAt` | Date | Last update time |
+
+---
+
+# 29. Investigation Query Types
+
+Possible query types:
+
+    DOCUMENT_SEARCH
+    TRANSACTION_SEARCH
+    ENTITY_SEARCH
+    RELATIONSHIP_SEARCH
+    FUND_FLOW
+    TIMELINE
+    GENERAL_INVESTIGATION
+
+The AI investigation layer may classify queries automatically.
+
+---
+
+# 30. AI Tool Calls
+
+AI tool calls should be recorded for traceability.
+
+Example:
+
+    {
+      "tool": "traceFundFlow",
+      "parameters": {
+        "accountId": "ACCOUNT_A",
+        "maxDepth": 4
+      },
+      "resultReference": "RESULT_ID"
+    }
+
+AI tools must never bypass backend authorization.
+
+Every tool request must be restricted to the authorized case.
+
+---
+
+# 31. Findings Collection
+
+Collection:
+
+    findings
+
+## Purpose
+
+Stores analytical and AI-generated findings that require investigator review.
+
+## Schema
+
+    Finding
+     |
+     +-- _id
+     +-- caseId
+     +-- title
+     +-- claim
+     +-- entityIds
+     +-- transactionIds
+     +-- evidenceIds
+     +-- analyticalSignals
+     +-- riskScore
+     +-- confidence
+     +-- contradictions
+     +-- unresolvedQuestions
+     +-- status
+     +-- createdBy
+     +-- reviewedBy
+     +-- reviewNotes
+     +-- reviewedAt
+     +-- createdAt
+     +-- updatedAt
+
+---
+
+# 32. Finding Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `_id` | ObjectId | Finding identifier |
+| `caseId` | ObjectId | Investigation case |
+| `title` | String | Finding title |
+| `claim` | String | Finding statement |
+| `entityIds` | ObjectId[] | Related entities |
+| `transactionIds` | ObjectId[] | Related transactions |
+| `evidenceIds` | ObjectId[] | Supporting evidence |
+| `analyticalSignals` | Array | Supporting analytical signals |
+| `riskScore` | Number | Overall analytical risk score |
+| `confidence` | Number | Finding confidence |
+| `contradictions` | String[] | Conflicting information |
+| `unresolvedQuestions` | String[] | Information requiring further investigation |
+| `status` | String | Review status |
+| `createdBy` | ObjectId | User or system creating finding |
+| `reviewedBy` | ObjectId | Investigator/reviewer |
+| `reviewNotes` | String | Investigator comments |
+| `reviewedAt` | Date | Review time |
+| `createdAt` | Date | Creation time |
+| `updatedAt` | Date | Last update time |
+
+---
+
+# 33. Finding Status
+
+Use the following statuses:
+
+    PENDING
+    UNDER_REVIEW
+    SUPPORTED
+    REJECTED
+    REQUIRES_MORE_EVIDENCE
+
+Important:
+
+A `SUPPORTED` finding means that the investigator has reviewed the available evidence and considers the finding sufficiently supported.
+
+It does not simply mean that the ML model predicted fraud.
+
+---
+
+# 34. Analytical Signals
+
+A finding may contain signals such as:
+
+    HIGH_VALUE
+    BEHAVIORAL_DEVIATION
+    HIGH_VELOCITY
+    UNUSUAL_TIME
+    UNUSUAL_COUNTERPARTY
+    NETWORK_PATTERN
+    TEMPORAL_PATTERN
+    MODEL_RISK
+
+Example:
+
+    {
+      "signalType": "BEHAVIORAL_DEVIATION",
+      "description": "Transaction amount differs significantly from historical account behavior.",
+      "source": "ML_ANALYSIS"
+    }
+
+---
+
+# 35. Contradictions and Unresolved Questions
+
+The finding model should support uncertainty.
+
+Example:
+
+    {
+      "contradictions": [
+        "Transaction description differs between two documents."
+      ],
+      "unresolvedQuestions": [
+        "Ownership of destination account requires verification."
+      ]
+    }
 
 This prevents the system from presenting uncertain information as established fact.
 
 ---
 
-# 29. Audit Logs Collection
+# 36. Audit Logs Collection
 
 Collection:
 
-```text
-auditLogs
-```
+    auditLogs
 
-Purpose:
+## Purpose
 
-Stores important security and investigation activity.
+Stores important security and investigation activities.
 
-### Logical schema
+## Schema
 
-```text
-AuditLog
-├── _id
-├── userId
-├── caseId
-├── action
-├── resourceType
-├── resourceId
-├── result
-├── metadata
-├── timestamp
-└── ipAddress
-```
+    AuditLog
+     |
+     +-- _id
+     +-- userId
+     +-- caseId
+     +-- action
+     +-- resourceType
+     +-- resourceId
+     +-- result
+     +-- metadata
+     +-- timestamp
 
-Sensitive information should not be unnecessarily stored in audit logs.
+## Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `_id` | ObjectId | Audit record identifier |
+| `userId` | ObjectId | User performing action |
+| `caseId` | ObjectId | Related case |
+| `action` | String | Action performed |
+| `resourceType` | String | Resource affected |
+| `resourceId` | ObjectId/String | Resource identifier |
+| `result` | String | SUCCESS or DENIED |
+| `metadata` | Object | Additional non-sensitive information |
+| `timestamp` | Date | Action time |
+
+IP address can be stored if required by the security implementation, but unnecessary personal or sensitive information should not be logged.
 
 ---
 
-# 30. Audit Events
+# 37. Audit Events
 
 Examples:
 
-```text
-LOGIN
-LOGOUT
-CASE_CREATED
-CASE_ACCESSED
-DOCUMENT_UPLOADED
-DOCUMENT_ACCESSED
-TRANSACTION_IMPORTED
-ENTITY_CREATED
-FINDING_CREATED
-FINDING_REVIEWED
-AI_INVESTIGATION
-EVIDENCE_ACCESSED
-REPORT_GENERATED
-```
+    LOGIN
+    LOGOUT
+    CASE_CREATED
+    CASE_ACCESSED
+    DOCUMENT_UPLOADED
+    DOCUMENT_ACCESSED
+    TRANSACTION_IMPORTED
+    ENTITY_CREATED
+    FINDING_CREATED
+    FINDING_REVIEWED
+    AI_INVESTIGATION
+    EVIDENCE_ACCESSED
+    REPORT_GENERATED
+    ACCESS_DENIED
 
 ---
 
-# 31. Collection Relationships
+# 38. Collection Relationships
 
 The logical relationships are:
 
-```text
-users
-  │
-  └──────────────┐
-                 ▼
-               cases
-                 │
-       ┌─────────┼─────────┬─────────┬─────────┐
-       ▼         ▼         ▼         ▼         ▼
-   documents transactions accounts entities investigations
-       │          │          │         │
-       ▼          │          │         ▼
-    evidence      │          └── relationships
-       │          │
-       └──────────┴───────────────┐
-                                  ▼
-                               findings
-                                  │
-                                  ▼
-                              auditLogs
-```
+    users
+       |
+       v
+    cases
+       |
+       +-- documents
+       |      |
+       |      +-- evidence
+       |
+       +-- transactions
+       |      |
+       |      +-- accounts
+       |
+       +-- entities
+       |      |
+       |      +-- relationships
+       |
+       +-- investigations
+       |
+       +-- findings
+       |
+       +-- auditLogs
 
-This is a logical relationship model rather than a relational database schema.
-
----
-
-# 32. Case Isolation Model
-
-Case isolation is one of the most important security requirements.
-
-For case-scoped collections:
-
-```text
-documents
-transactions
-accounts
-entities
-relationships
-evidence
-investigations
-findings
-```
-
-the system should associate records with a `caseId`.
-
-A typical backend query should conceptually follow:
-
-```text
-User
- ↓
-Verify authentication
- ↓
-Verify case permission
- ↓
-Query using caseId
- ↓
-Return only authorized records
-```
+This is a logical data model rather than a relational database schema.
 
 ---
 
-# 33. Case Isolation Example
+# 39. Case Isolation Model
+
+Case isolation is a core security requirement.
+
+The following collections are case-scoped:
+
+    documents
+    transactions
+    accounts
+    entities
+    relationships
+    evidence
+    investigations
+    findings
+    auditLogs
+
+Each record must contain the appropriate `caseId`.
+
+The backend must verify:
+
+    User
+      |
+      v
+    Authentication
+      |
+      v
+    Case Permission
+      |
+      v
+    caseId Filter
+      |
+      v
+    Database Query
+      |
+      v
+    Authorized Data
+
+---
+
+# 40. Case Isolation Example
 
 Incorrect:
 
-```javascript
-Transaction.find({
-  accountId: accountId
-});
-```
+    Transaction.find({
+      accountId: accountId
+    })
 
-This may potentially return records belonging to different cases.
+This can potentially return records from multiple cases.
 
 Preferred:
 
-```javascript
-Transaction.find({
-  caseId: caseId,
-  accountId: accountId
-});
-```
+    Transaction.find({
+      caseId: caseId,
+      accountId: accountId
+    })
 
-The exact implementation will depend on the final backend architecture.
+The backend should verify that the user has access to the requested case before executing the query.
 
 ---
 
-# 34. Cross-Case Access Prevention
+# 41. Cross-Case Access Prevention
 
-The following situations must be prevented:
+The system must prevent:
 
-```text
-Case A user
-   ↓
-Request Case B transaction
-   ↓
-Backend
-   ↓
-Permission check
-   ↓
-DENY
-```
+    Case A User
+          |
+          v
+    Request Case B Data
+          |
+          v
+    Authorization Check
+          |
+          v
+        DENY
 
-This must apply not only to normal APIs but also to:
+This rule must apply to:
 
-* AI tools
-* RAG retrieval
-* graph queries
-* document search
-* fund-flow analysis
-* investigation sessions
-
----
-
-# 35. AI Data Access Boundary
-
-The AI agent should never directly access MongoDB.
-
-The architecture should be:
-
-```text
-AI Agent
-   │
-   ▼
-Investigation Tool
-   │
-   ▼
-Backend Authorization
-   │
-   ▼
-Case-Scoped Database Query
-   │
-   ▼
-Authorized Result
-   │
-   ▼
-AI Agent
-```
-
-This ensures that AI access follows the same authorization rules as normal application requests.
+- Normal API requests
+- AI tools
+- RAG retrieval
+- Document search
+- Transaction search
+- Entity search
+- Relationship analysis
+- Fund-flow analysis
+- Investigation sessions
 
 ---
 
-# 36. RAG Data Boundary
+# 42. AI Data Access Boundary
 
-RAG data should retain case association.
+The AI agent must not directly access MongoDB.
 
-Conceptually:
+Correct architecture:
 
-```text
-Document Chunk
-├── caseId
-├── documentId
-├── pageNumber
-├── section
-├── text
-└── embedding
-```
+    AI Agent
+        |
+        v
+    Investigation Tool
+        |
+        v
+    Backend Authorization
+        |
+        v
+    Case-Scoped Query
+        |
+        v
+    Authorized Result
+        |
+        v
+    AI Agent
 
-Retrieval should always apply the appropriate case scope.
-
-Example:
-
-```text
-Search Query
-      │
-      ▼
-Case Filter
-      │
-      ▼
-Vector / Keyword Retrieval
-      │
-      ▼
-Relevant Case Evidence
-```
-
-A document from another investigation must not be retrieved into the current case context.
+This ensures that AI access follows the same security rules as normal application requests.
 
 ---
 
-# 37. Knowledge Graph Data Boundary
+# 43. RAG Data Model
 
-Graph nodes and relationships should also retain case context.
+RAG data should maintain case association.
 
-Conceptually:
+The logical document chunk structure is:
 
-```text
-Graph Node
-├── nodeId
-├── caseId
-├── nodeType
-└── properties
-```
+    DocumentChunk
+     |
+     +-- _id
+     +-- caseId
+     +-- documentId
+     +-- pageNumber
+     +-- section
+     +-- text
+     +-- embeddingReference
 
-and:
+The actual embeddings may be stored in the selected retrieval/vector solution.
 
-```text
-Graph Relationship
-├── relationshipId
-├── caseId
-├── sourceNode
-├── targetNode
-└── relationshipType
-```
-
-This prevents cross-case graph contamination.
+The important requirement is that every retrievable chunk remains associated with its case.
 
 ---
 
-# 38. Transaction-to-Account Relationship
+# 44. RAG Case Isolation
 
-Transactions connect accounts.
+RAG retrieval must follow:
 
-```text
-Source Account
-      │
-      │ transaction
-      ▼
-Transaction
-      │
-      ▼
-Destination Account
-```
+    User Question
+         |
+         v
+    Authorized Case
+         |
+         v
+    Case Filter
+         |
+         v
+    Document Retrieval
+         |
+         v
+    Relevant Evidence
+         |
+         v
+    LLM
 
-The transaction should preserve both source and destination references where available.
+Documents from another investigation must never enter the current case context.
+
+---
+
+# 45. Transaction-to-Account Relationship
+
+Transactions connect source and destination accounts.
+
+    Source Account
+          |
+          | Transaction
+          v
+      Transaction
+          |
+          v
+    Destination Account
+
+A transaction should store both source and destination account references where available.
 
 This supports:
 
-* transaction analysis
-* fund-flow tracing
-* graph construction
-* temporal analysis
+- Transaction analysis
+- Fund-flow tracing
+- Relationship analysis
+- Graph construction
+- Temporal analysis
 
 ---
 
-# 39. Entity-to-Account Relationship
+# 46. Entity-to-Account Relationship
 
-Accounts may be associated with entities.
+Accounts may be associated with one or more entities.
 
-```text
-Person / Company
-       │
-       │ owns / controls
-       ▼
-    Account
-```
+    Person / Company
+          |
+          | OWNS / CONTROLS
+          v
+        Account
 
-This relationship should be represented explicitly rather than relying only on text fields.
+This relationship should be explicitly represented using the `relationships` collection.
 
 ---
 
-# 40. Document-to-Evidence Relationship
+# 47. Document-to-Evidence Relationship
 
-```text
-Document
-   │
-   ├── page 1
-   ├── page 2
-   ├── page 3
-   │
-   ▼
-Evidence
-```
+    Document
+       |
+       +-- Page
+       |
+       +-- Section
+       |
+       v
+    Evidence
 
 Evidence should reference the source document and location whenever possible.
 
 ---
 
-# 41. Finding-to-Evidence Relationship
+# 48. Finding-to-Evidence Relationship
 
-```text
-Finding
-   │
-   ├── Evidence A
-   ├── Evidence B
-   ├── Transaction C
-   └── Relationship D
-```
+    Finding
+       |
+       +-- Evidence A
+       +-- Evidence B
+       +-- Transaction C
+       +-- Relationship D
 
-This enables evidence-grounded findings.
+This provides the foundation for evidence-grounded findings.
 
 ---
 
-# 42. Indexing Strategy
+# 49. Indexing Strategy
 
-Indexes should be created based on actual query patterns.
+Indexes should be based on actual application query patterns.
 
-Important candidate indexes include:
+## Users
 
-### Cases
+    email
 
-```text
-caseNumber
-createdBy
-```
+Email should be unique.
 
-### Documents
+## Cases
 
-```text
-caseId
-caseId + documentType
-caseId + processingStatus
-```
+    caseNumber
+    createdBy
+    investigators
 
-### Transactions
+## Documents
 
-```text
-caseId
-caseId + transactionId
-caseId + accountId
-caseId + timestamp
-caseId + riskLevel
-caseId + destinationAccountId
-```
+    caseId
+    caseId + documentType
+    caseId + processingStatus
 
-### Accounts
+## Transactions
 
-```text
-caseId
-caseId + accountNumberMasked
-```
+    caseId
+    caseId + transactionId
+    caseId + sourceAccountId
+    caseId + destinationAccountId
+    caseId + timestamp
+    caseId + riskLevel
 
-### Entities
+## Accounts
 
-```text
-caseId
-caseId + entityType
-caseId + name
-```
+    caseId
+    caseId + accountNumberMasked
 
-### Relationships
+## Entities
 
-```text
-caseId
-caseId + sourceId
-caseId + targetId
-caseId + relationshipType
-```
+    caseId
+    caseId + entityType
+    caseId + name
 
-### Evidence
+## Relationships
 
-```text
-caseId
-caseId + documentId
-caseId + evidenceType
-```
+    caseId
+    caseId + sourceId
+    caseId + targetId
+    caseId + relationshipType
 
-### Investigations
+## Evidence
 
-```text
-caseId
-caseId + userId
-caseId + createdAt
-```
+    caseId
+    caseId + documentId
+    caseId + evidenceType
 
-### Findings
+## Investigations
 
-```text
-caseId
-caseId + status
-caseId + createdAt
-```
+    caseId
+    caseId + userId
+    caseId + createdAt
 
-Indexes should be validated against actual application queries before production deployment.
+## Findings
+
+    caseId
+    caseId + status
+    caseId + createdAt
+
+Indexes should be reviewed against the actual queries during implementation.
 
 ---
 
-# 43. Data Integrity Rules
+# 50. Data Integrity Rules
 
-The following integrity rules should be enforced:
+The following rules must be enforced:
 
 1. Every case-scoped record must belong to a valid case.
-2. A transaction must belong to the correct case.
-3. An account must belong to the correct case.
-4. Entity relationships must not silently cross case boundaries.
+
+2. Every transaction must belong to the correct case.
+
+3. Every account must belong to the correct case.
+
+4. Entity relationships must not cross case boundaries.
+
 5. Evidence must reference a valid source where applicable.
-6. Findings must reference evidence or analytical signals where appropriate.
-7. AI investigation sessions must belong to the correct case.
+
+6. Findings should reference supporting evidence or analytical signals.
+
+7. Investigation sessions must belong to the correct case.
+
 8. Unauthorized users must not retrieve case data.
-9. Deleted or invalid source records should not silently invalidate evidence provenance.
-10. Sensitive data must not be unnecessarily exposed.
+
+9. AI tools must use case-scoped authorization.
+
+10. RAG retrieval must remain case-scoped.
+
+11. Sensitive information must not be unnecessarily exposed.
+
+12. Model predictions must not automatically become confirmed findings.
 
 ---
 
-# 44. Data Lifecycle
+# 51. Data Lifecycle
 
 A typical investigation data lifecycle is:
 
-```text
-Upload
-  ↓
-Validation
-  ↓
-Storage
-  ↓
-Processing
-  ↓
-Extraction
-  ↓
-Analysis
-  ↓
-Evidence Creation
-  ↓
-Investigation
-  ↓
-Finding
-  ↓
-Review
-  ↓
-Report
-  ↓
-Archive
-```
+    Upload
+       |
+       v
+    Validation
+       |
+       v
+    Storage
+       |
+       v
+    Processing
+       |
+       v
+    Extraction
+       |
+       v
+    Analysis
+       |
+       v
+    Evidence Creation
+       |
+       v
+    Investigation
+       |
+       v
+    Finding
+       |
+       v
+    Investigator Review
+       |
+       v
+    Report
+       |
+       v
+    Archive
 
 ---
 
-# 45. Data Flow Example
+# 52. Data Flow Example
 
-Example investigation:
+Example investigation flow:
 
-```text
-Bank Statement PDF
-        │
-        ▼
-Document
-        │
-        ▼
-OCR / Extraction
-        │
-        ▼
-Evidence
-        │
-        ├──────────────► Account
-        │
-        ├──────────────► Transaction
-        │
-        └──────────────► Entity
-                              │
-                              ▼
-                         Relationship
-                              │
-                              ▼
-                        Knowledge Graph
-                              │
-                              ▼
-                        Investigation
-                              │
-                              ▼
-                           Finding
-                              │
-                              ▼
-                      Investigator Review
-```
-
----
-
-# 46. Example Investigation Data
-
-A simplified case may look like:
-
-```text
-CASE-2026-014
-│
-├── Entity
-│   └── ABC Private Limited
-│
-├── Account
-│   └── Account-A
-│
-├── Transaction
-│   ├── TXN-001
-│   ├── TXN-002
-│   └── TXN-003
-│
-├── Document
-│   └── BankStatement.pdf
-│
-├── Evidence
-│   └── Page 12 transaction record
-│
-├── Relationship
-│   └── ABC Private Limited → OWNS → Account-A
-│
-└── Finding
-    └── Unusual transaction sequence
-```
+    Bank Statement PDF
+           |
+           v
+       Document
+           |
+           v
+      OCR / Extraction
+           |
+           v
+        Evidence
+           |
+       +---+---+
+       |   |   |
+       v   v   v
+    Account Transaction Entity
+       |       |       |
+       +-------+-------+
+               |
+               v
+         Relationships
+               |
+               v
+        Investigation
+               |
+               v
+             Finding
+               |
+               v
+      Investigator Review
+               |
+               v
+             Report
 
 ---
 
-# 47. Sensitive Data Handling
+# 53. ML Data Flow
+
+Transactions are used to generate analytical features.
+
+    Transactions
+         |
+         v
+    Feature Engineering
+         |
+         +-- transactionHour
+         +-- isNightTransaction
+         +-- isHighValue
+         +-- transactionCount
+         +-- previousTotalAmount
+         +-- averageAmount
+         +-- previousMaximumAmount
+         +-- amountDeviation
+         +-- transactionsLastHour
+         +-- transactionsLast24Hours
+         +-- amountLastHour
+         |
+         v
+       ML Model
+         |
+         v
+    Risk / Analytical Signal
+         |
+         v
+       Finding
+
+The final feature set may change during ML experimentation and evaluation.
+
+---
+
+# 54. Temporal Analysis
+
+Transaction timestamps must support chronological analysis.
+
+The system should support queries such as:
+
+    Get all transactions for Account A
+    between T1 and T2
+    ordered by timestamp
+
+This supports:
+
+- Transaction timelines
+- Velocity analysis
+- Suspicious periods
+- Transaction sequences
+- Fund-flow timing
+- Behavioral analysis
+
+---
+
+# 55. Fund-Flow Data Model
+
+Fund-flow analysis is reconstructed from transaction relationships.
+
+Example:
+
+    Account A
+        |
+        +-- TXN-001 --> Account B
+                            |
+                            +-- TXN-002 --> Account C
+                                                  |
+                                                  +-- TXN-003 --> Account D
+
+The system should be able to reconstruct this path using:
+
+- sourceAccountId
+- destinationAccountId
+- transactionId
+- timestamp
+- amount
+
+---
+
+# 56. Investigator Review Model
+
+Findings must preserve both analytical information and investigator decisions.
+
+    Finding
+       |
+       +-- AI / ML Information
+       |
+       +-- Evidence
+       |
+       +-- Uncertainty
+       |
+       +-- Contradictions
+       |
+       +-- Investigator Review
+              |
+              +-- Status
+              +-- Reviewer
+              +-- Notes
+              +-- Timestamp
+
+This separates automated analysis from human decision-making.
+
+---
+
+# 57. Reporting Data Flow
+
+Reports should be generated from investigation records rather than directly from raw AI output.
+
+    Transactions
+         |
+         v
+      Entities
+         |
+         v
+      Documents
+         |
+         v
+      Evidence
+         |
+         v
+   Analytical Signals
+         |
+         v
+      Findings
+         |
+         v
+ Investigator Review
+         |
+         v
+ Investigation Report
+
+This improves traceability and reduces unsupported AI-generated conclusions in the final report.
+
+---
+
+# 58. Sensitive Data Handling
 
 Financial investigation data may contain sensitive information.
 
 The system should minimize unnecessary exposure of:
 
-* full account numbers
-* authentication credentials
-* personal identifiers
-* confidential documents
-* internal investigation information
+- Full account numbers
+- Passwords
+- Authentication credentials
+- Personal identifiers
+- Confidential documents
+- Internal investigation information
 
 Where appropriate, account numbers should be masked.
 
 Example:
 
-```text
-XXXXXX1234
-```
+    XXXXXXXX1234
 
-rather than exposing the complete account number to every application component.
+rather than exposing the complete account number.
+
+Passwords must only be stored as secure password hashes.
 
 ---
 
-# 48. Database Security
+# 59. Database Security
 
 MongoDB should:
 
-* require authentication
-* use controlled database users
-* avoid public internet exposure
-* use secure connection configuration
-* restrict database network access
-* store credentials in environment variables or a secure secret-management system
-* use backups appropriate to the deployment environment
+- Require authentication
+- Use controlled database users
+- Avoid public internet exposure
+- Use secure connection configuration
+- Restrict database network access
+- Store credentials in environment variables
+- Use secure secret management where appropriate
+- Use appropriate backups
 
 Database credentials must never be committed to Git.
 
 ---
 
-# 49. Backup and Recovery
+# 60. Backup and Recovery
 
-Production deployments should consider:
+For the B.Tech prototype, basic backup and recovery should be considered.
 
-* regular backups
-* backup verification
-* recovery procedures
-* retention policies
-* protection of backup files
-* encryption of sensitive backups
+Possible measures:
 
-Backup requirements may be simplified for the academic prototype.
+- Database backups
+- Backup verification
+- Recovery procedure
+- Protection of backup files
+- Appropriate backup retention
 
----
-
-# 50. Graph Database Boundary
-
-The logical relationship model is independent of the physical graph implementation.
-
-Initially, relationships may be represented through MongoDB documents.
-
-A future implementation may use a dedicated graph database if justified by:
-
-* graph query complexity
-* investigation scale
-* performance requirements
-* visualization requirements
-* multi-hop relationship analysis
-
-The logical model should remain:
-
-```text
-Entity / Account / Transaction
-          │
-          ▼
-      Relationship
-          │
-          ▼
-       Graph Path
-```
+Production-level disaster recovery is outside the core project scope.
 
 ---
 
-# 51. Vector Database Boundary
+# 61. Graph Data Boundary
 
-RAG/vector storage should also remain logically separate from the main application database.
+FraudLens does not require a dedicated graph database for the initial implementation.
 
-The logical document representation is:
+Relationships are initially stored in MongoDB.
 
-```text
-Document
-   │
-   ▼
-Document Chunk
-   │
-   ├── caseId
-   ├── documentId
-   ├── page
-   ├── section
-   ├── text
-   └── embedding
-```
+The logical model is:
 
-A dedicated vector database can be introduced if required by scale or retrieval performance.
+    Entity / Account / Transaction
+                |
+                v
+           Relationship
+                |
+                v
+            Graph Path
 
----
+A dedicated graph database can be considered later if required for:
 
-# 52. MongoDB vs Specialized Stores
+- Complex multi-hop queries
+- Large investigation graphs
+- Performance
+- Advanced graph analysis
+- Visualization
 
-The architecture separates three logical data categories:
-
-| Data Category           | Initial Approach                         | Possible Future Technology |
-| ----------------------- | ---------------------------------------- | -------------------------- |
-| Application / Case Data | MongoDB                                  | MongoDB                    |
-| Graph Data              | MongoDB-based relationship model         | Dedicated Graph DB         |
-| Vector / Retrieval Data | Application-integrated retrieval storage | Dedicated Vector DB        |
-| Source Documents        | File/object storage                      | Object Storage             |
-| ML Data                 | Files / Python data pipeline             | Data/ML platform           |
-
-The initial prototype should avoid unnecessary infrastructure complexity.
+The logical data model should not depend on a specific graph database.
 
 ---
 
-# 53. Data Model and ML Layer
+# 62. Vector / RAG Data Boundary
 
-The ML layer should consume analytical features derived from transactions and historical behavior.
+FraudLens does not require a dedicated vector database for the initial prototype.
 
-Conceptually:
+The logical retrieval model is:
 
-```text
-transactions
-      │
-      ▼
-Feature Engineering
-      │
-      ├── transactionHour
-      ├── isNightTransaction
-      ├── isHighValue
-      ├── transactionCount
-      ├── previousTotalAmount
-      ├── averageAmount
-      ├── previousMaximumAmount
-      ├── amountDeviation
-      ├── transactionsLastHour
-      ├── transactionsLast24Hours
-      └── amountLastHour
-      │
-      ▼
-ML Model
-      │
-      ▼
-Analytical Signal
-```
+    Document
+       |
+       v
+    Document Chunk
+       |
+       +-- caseId
+       +-- documentId
+       +-- pageNumber
+       +-- section
+       +-- text
+       +-- embeddingReference
 
-The final feature set may evolve as the ML research and evaluation progress.
+A dedicated vector database can be introduced later if retrieval performance or project requirements justify it.
 
 ---
 
-# 54. Data Model and Temporal Analysis
+# 63. MongoDB vs Specialized Storage
 
-Transaction timestamps must support chronological investigation.
+| Data | Initial Approach | Possible Future Approach |
+|---|---|---|
+| Application data | MongoDB | MongoDB |
+| Case data | MongoDB | MongoDB |
+| Transactions | MongoDB | MongoDB |
+| Relationships | MongoDB | Graph DB |
+| Retrieval data | Application-integrated retrieval | Vector DB |
+| Source documents | Private file storage | Object storage |
+| ML datasets | CSV / Python files | ML data platform |
 
-The system should allow queries such as:
-
-```text
-Transactions for Account A
-between T1 and T2
-ordered by timestamp
-```
-
-This supports:
-
-* activity timelines
-* velocity analysis
-* suspicious periods
-* transaction sequences
-* fund-flow timing
+The initial B.Tech implementation should avoid unnecessary infrastructure.
 
 ---
 
-# 55. Data Model and Fund Flow
+# 64. Database and Security Boundary
 
-Fund-flow analysis should use transaction relationships.
+The database must never be directly exposed to the frontend.
 
-```text
-Account A
-    │
-    └── TXN-001 ──> Account B
-                         │
-                         └── TXN-002 ──> Account C
-                                              │
-                                              └── TXN-003 ──> Account D
-```
+Correct architecture:
 
-The system should be able to reconstruct this path from stored transactions.
+    React Frontend
+          |
+          v
+    Node.js API
+          |
+          +-- Authentication
+          |
+          +-- Authorization
+          |
+          +-- Case Isolation
+          |
+          v
+       MongoDB
 
----
-
-# 56. Data Model and Investigator Review
-
-Findings should preserve both AI/analytical information and investigator decisions.
-
-```text
-Finding
-│
-├── AI / Analytical Information
-│
-├── Evidence
-│
-├── Uncertainty
-│
-├── Contradictions
-│
-└── Investigator Review
-      ├── Status
-      ├── Reviewer
-      ├── Notes
-      └── Timestamp
-```
-
-This supports the human-in-the-loop requirement.
+The frontend communicates with the backend API rather than directly with MongoDB.
 
 ---
 
-# 57. Data Model and Reporting
+# 65. Database and AI Boundary
 
-Reports should be generated from verified investigation records rather than directly from raw AI output.
+The AI system must not directly query MongoDB.
 
-```text
-Transactions
-     │
-Entities
-     │
-Documents
-     │
-Evidence
-     │
-Analytical Signals
-     │
-Findings
-     │
-Investigator Review
-     │
-     ▼
-Investigation Report
-```
+Correct architecture:
 
-This improves traceability and reduces the risk of unsupported AI-generated conclusions entering the final report.
+    AI Agent
+        |
+        v
+    Controlled Tool
+        |
+        v
+    Node.js Backend
+        |
+        +-- Authorization
+        +-- Case Validation
+        +-- Input Validation
+        |
+        v
+    MongoDB
+        |
+        v
+    Authorized Result
+        |
+        v
+    AI Agent
 
----
-
-# 58. Data Model Traceability to Requirements
-
-| Requirement                      | Data Model Support                          |
-| -------------------------------- | ------------------------------------------- |
-| FR-01 Case Management            | `cases`, `users`                            |
-| FR-02 Document Ingestion         | `documents`                                 |
-| FR-03 Transaction Ingestion      | `transactions`                              |
-| FR-04 Transaction Analysis       | `transactions`, analytical signals          |
-| FR-05 Anomaly and Risk Analysis  | `transactions`, `findings`                  |
-| FR-06 Temporal Analysis          | transaction timestamps                      |
-| FR-07 Entity Management          | `entities`                                  |
-| FR-08 Relationship Analysis      | `relationships`                             |
-| FR-09 Fund-Flow Analysis         | `transactions`, `accounts`, `relationships` |
-| FR-10 Entity Resolution          | `entities`                                  |
-| FR-11 Document Processing        | `documents`, `evidence`                     |
-| FR-12 Evidence Retrieval         | `evidence`, document metadata               |
-| FR-13 Knowledge Representation   | `entities`, `relationships`                 |
-| FR-14 Investigation Queries      | `investigations`                            |
-| FR-15 Evidence-Grounded Findings | `findings`, `evidence`                      |
-| FR-16 Investigator Review        | `findings`                                  |
-| FR-17 Investigation Reporting    | findings + investigation data               |
-| SEC-02 RBAC                      | `users`                                     |
-| SEC-03 Case Isolation            | `caseId`                                    |
-| SEC-09 Audit Logging             | `auditLogs`                                 |
+This ensures that AI cannot bypass the application's security controls.
 
 ---
 
-# 59. Data Model Summary
+# 66. Semester 7 Database Scope
 
-The FraudLens data model is centered around the following relationship:
+The Semester 7 prototype should prioritize:
 
-```text
-                         CASE
-                           │
-        ┌──────────────────┼──────────────────┐
-        │                  │                  │
-        ▼                  ▼                  ▼
-    DOCUMENTS         TRANSACTIONS          ENTITIES
-        │                  │                  │
-        ▼                  ▼                  ▼
-     EVIDENCE           ACCOUNTS        RELATIONSHIPS
-        │                  │                  │
-        └──────────────────┼──────────────────┘
-                           │
-                           ▼
-                    INVESTIGATION
-                           │
-                           ▼
-                        FINDING
-                           │
-                           ▼
-                  INVESTIGATOR REVIEW
-                           │
-                           ▼
-                        REPORT
-```
+- users
+- cases
+- documents
+- transactions
+- accounts
+- entities
+- evidence
+- basic investigations
+- findings
+- audit logs
+
+Relationships can be implemented in the initial prototype where required by the investigation workflow.
+
+The database should first support a complete working case lifecycle.
 
 ---
 
-# 60. Final Data Model Decisions
+# 67. Semester 8 Database Extensions
+
+Semester 8 can extend the database with:
+
+- Advanced relationships
+- Entity resolution information
+- Advanced fund-flow analysis
+- More detailed evidence provenance
+- AI tool-call history
+- Improved investigation sessions
+- Advanced findings
+- RAG metadata
+- Model evaluation information
+
+These should be added only when required by the implementation.
+
+---
+
+# 68. Requirement Mapping
+
+| Requirement | Database Support |
+|---|---|
+| Case Management | `cases`, `users` |
+| Document Ingestion | `documents` |
+| Transaction Ingestion | `transactions` |
+| Transaction Analysis | `transactions` |
+| Risk / Anomaly Analysis | `transactions`, `findings` |
+| Temporal Analysis | `transactions.timestamp` |
+| Entity Management | `entities` |
+| Relationship Analysis | `relationships` |
+| Entity Resolution | `entities` |
+| Fund-Flow Analysis | `transactions`, `accounts`, `relationships` |
+| Document Processing | `documents`, `evidence` |
+| Evidence Retrieval | `evidence` |
+| Knowledge Representation | `entities`, `relationships` |
+| Investigation Queries | `investigations` |
+| AI Investigation | `investigations`, controlled tool records |
+| Evidence-Grounded Findings | `findings`, `evidence` |
+| Investigator Review | `findings` |
+| Reporting | `findings`, `evidence`, investigation data |
+| Authentication | `users` |
+| Authorization | `users`, `cases` |
+| Case Isolation | `caseId` |
+| Audit Logging | `auditLogs` |
+
+---
+
+# 69. Final Database Architecture
+
+The final logical database structure is:
+
+    FraudLens MongoDB
+    |
+    +-- users
+    |
+    +-- cases
+    |     |
+    |     +-- investigators
+    |
+    +-- documents
+    |     |
+    |     +-- evidence
+    |
+    +-- transactions
+    |     |
+    |     +-- accounts
+    |
+    +-- entities
+    |     |
+    |     +-- relationships
+    |
+    +-- investigations
+    |
+    +-- findings
+    |
+    +-- auditLogs
+
+The Case remains the central logical boundary.
+
+---
+
+# 70. Final Database Design Decisions
 
 The current FraudLens database design establishes:
 
 1. MongoDB as the primary application database.
+
 2. A case-centered data model.
-3. `caseId` as the primary logical isolation mechanism for case-scoped records.
-4. Separate collections for users, cases, documents, transactions, accounts, entities, relationships, evidence, investigations, findings and audit logs.
-5. Explicit relationships between transactions, accounts and entities.
-6. Evidence provenance through document and source references.
-7. Investigation sessions for investigator and AI activity.
-8. Findings as reviewable analytical outputs.
-9. Human investigator review as a separate stage from model prediction.
-10. Audit logging for important security and investigation actions.
-11. Logical separation between application data, graph data and vector/RAG data.
-12. Flexibility for future dedicated graph and vector databases.
-13. Backend-enforced authorization as the primary case-isolation mechanism.
+
+3. `caseId` as the primary logical mechanism for case isolation.
+
+4. Separate collections for users, cases, documents, transactions, accounts, entities, relationships, evidence, investigations, findings, and audit logs.
+
+5. Explicit source and destination account references for transactions.
+
+6. Explicit relationships between entities, accounts, transactions, and documents.
+
+7. Evidence provenance through source references.
+
+8. Investigation sessions for investigator and AI activity.
+
+9. Findings as reviewable analytical outputs.
+
+10. Human investigator review as a separate stage from model prediction.
+
+11. Audit logging for important security and investigation actions.
+
+12. Case-scoped RAG data.
+
+13. Backend-enforced authorization.
+
+14. No direct database access from the frontend.
+
+15. No direct database access from the AI agent.
+
+16. No mandatory dedicated graph database for the initial implementation.
+
+17. No mandatory dedicated vector database for the initial implementation.
+
+18. A simple architecture suitable for the B.Tech project timeline.
+
+19. The database can be extended during Semester 8 without redesigning the complete logical model.
 
 ---
 
-# 61. Next Design Stage
+# 71. Next Design Stage
 
-After this database design is finalized, the next stage is:
+After finalizing the database design, the next stage is:
 
-**API Architecture & Endpoint Design**
+## API Architecture and Endpoint Design
 
-The API design will define:
+The API design should define:
 
-* authentication endpoints
-* case endpoints
-* document endpoints
-* transaction endpoints
-* account endpoints
-* entity endpoints
-* relationship endpoints
-* evidence endpoints
-* investigation endpoints
-* finding/review endpoints
-* report endpoints
-* audit endpoints
-
-The API design will then be mapped against the **existing FraudLens backend implementation** so that existing working functionality is preserved rather than unnecessarily rewritten.
+- Authentication endpoints
+- User endpoints
+- Case endpoints
+- Document endpoints
+- Transaction endpoints
+- Account endpoints
+- Entity endpoints
+- Relationship endpoints
+- Evidence endpoints
+- Investigation endpoints
+- Finding and review endpoints
+- Report endpoints
+- Audit endpoints
