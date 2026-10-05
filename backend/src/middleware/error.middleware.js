@@ -34,8 +34,9 @@ export const errorHandler = (err, req, res, next) => {
         body.error.details = err.details;
     }
 
-    // Stack traces are only exposed in local development.
-    if (process.env.NODE_ENV !== "production" && err.stack) {
+    // Stack traces are only exposed in local development, and only for
+    // unexpected errors — never for expected client-safe errors (400/401/403/404).
+    if (process.env.NODE_ENV !== "production" && !isExpected && err.stack) {
         body.error.stack = err.stack;
     }
 
