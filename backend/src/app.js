@@ -4,6 +4,8 @@ import cors from "cors";
 import healthRoutes from "./routes/health.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import caseRoutes from "./routes/case.routes.js";
+import accountRoutes from "./routes/account.routes.js";
+import transactionRoutes from "./routes/transaction.routes.js";
 import { notFoundHandler, errorHandler } from "./middleware/error.middleware.js";
 
 const app = express();
@@ -21,6 +23,10 @@ app.use(express.urlencoded({ extended: true, limit: "100kb" }));
 app.use("/api/v1/health", healthRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/cases", caseRoutes);
+// Case-scoped resources: the caseId mount parameter is validated and
+// authorization-checked inside each router's service layer.
+app.use("/api/v1/cases/:caseId/accounts", accountRoutes);
+app.use("/api/v1/cases/:caseId/transactions", transactionRoutes);
 
 // Unknown routes + centralized error handling (must stay last)
 app.use(notFoundHandler);

@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Case from "../models/Case.js";
 import User from "../models/User.js";
 import ApiError from "../utils/ApiError.js";
@@ -85,10 +86,17 @@ export async function getCasesForUser(authenticatedUser) {
 }
 
 /**
- * Loads one case and enforces case isolation.
+ * Loads a case document and enforces case isolation. Shared by the
+ * account/transaction services so the access rule exists in exactly one place.
  * @throws {ApiError} 404 unknown case, 403 case belongs to another investigation
  */
-export async function getCaseById(authenticatedUser, caseId) {
+export async function getAccessibleCaseDoc(authenticatedUser, caseId) {
+    // A malformed caseId can never reach the database; treat it as unknown so
+    // nested resources (accounts/transactions) fail safely with 404.
+    if (!mongoose.isValidObjectId(caseId)) {
+        throw new ApiError(404, "Case not found");
+    }
+
     const caseDoc = await Case.findById(caseId);
     if (!caseDoc) {
         throw new ApiError(404, "Case not found");
@@ -98,6 +106,15 @@ export async function getCaseById(authenticatedUser, caseId) {
         // exists elsewhere — no case data is exposed.
         throw new ApiError(403, "You do not have access to this case");
     }
+    return caseDoc;
+}
+
+/**
+ * Loads one case and enforces case isolation.
+ * @throws {ApiError} 404 unknown case, 403 case belongs to another investigation
+ */
+export async function getCaseById(authenticatedUser, caseId) {
+    const caseDoc = await getAccessibleCaseDoc(authenticatedUser, caseId);
     return caseDoc.toJSON();
 }
 
@@ -106,13 +123,7 @@ export async function getCaseById(authenticatedUser, caseId) {
  * caseNumber, createdBy and timestamps can never be modified through this path.
  */
 export async function updateCase(authenticatedUser, caseId, updates) {
-    const caseDoc = await Case.findById(caseId);
-    if (!caseDoc) {
-        throw new ApiError(404, "Case not found");
-    }
-    if (!canAccess(caseDoc, authenticatedUser.id)) {
-        throw new ApiError(403, "You do not have access to this case");
-    }
+    const caseDoc = await getAccessibleCaseDoc(authenticatedUser, caseId);
 
     if (updates.investigators !== undefined) {
         await assertInvestigatorsExist(updates.investigators);
