@@ -11,6 +11,9 @@ logs/
 *.log
 npm-debug.log*
 
+# Private document storage (uploaded evidence files must never be committed)
+uploads/
+
 # Test coverage
 coverage/
 

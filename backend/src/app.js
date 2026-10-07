@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.routes.js";
 import caseRoutes from "./routes/case.routes.js";
 import accountRoutes from "./routes/account.routes.js";
 import transactionRoutes from "./routes/transaction.routes.js";
+import documentRoutes from "./routes/document.routes.js";
 import { notFoundHandler, errorHandler } from "./middleware/error.middleware.js";
 
 const app = express();
@@ -27,6 +28,11 @@ app.use("/api/v1/cases", caseRoutes);
 // authorization-checked inside each router's service layer.
 app.use("/api/v1/cases/:caseId/accounts", accountRoutes);
 app.use("/api/v1/cases/:caseId/transactions", transactionRoutes);
+app.use("/api/v1/cases/:caseId/documents", documentRoutes);
+
+// NOTE: the document storage directory is intentionally NOT mounted with
+// express.static - uploaded files are only reachable through the
+// authorization-checked document APIs.
 
 // Unknown routes + centralized error handling (must stay last)
 app.use(notFoundHandler);
