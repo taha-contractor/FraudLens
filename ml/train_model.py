@@ -1,138 +1,62 @@
-import pandas as pd
+"""Temporal (time-ordered) evaluation of the FraudLens fraud classifier.
 
-from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import (
-    classification_report,
-    confusion_matrix,
-    roc_auc_score
+The first 80% of transactions by time train the model, the remaining 20% are the
+future it has to score. No random row split is used: a random split would let the
+model train on transactions that happened after the one it is being tested on.
+
+Historical features are causal and prefix-stable (see feature_engineering.py), so
+a training row cannot carry information from after its own timestamp. The split
+boundary is asserted inside ml_config.temporal_split and raises rather than
+warning.
+
+This is a research prototype on synthetic data. Nothing here is production ready.
+"""
+
+from ml_config import (
+    FEATURE_COLUMNS,
+    audit_feature_leakage,
+    describe_split,
+    fit_and_score,
+    load_features,
+    temporal_split,
 )
-
-
-INPUT_FILE = "ml/data/fraud_features.csv"
 
 
 def main():
     print("Loading feature dataset...")
-    df = pd.read_csv(INPUT_FILE)
-    df["timestamp"] = pd.to_datetime(df["timestamp"])
-    df = df.sort_values("timestamp").reset_index(drop=True)
+    df = load_features()
     print(f"Total transactions: {len(df)}")
+    print(f"Accounts: {df['accountId'].nunique()}")
+    print(f"Available features: {len(FEATURE_COLUMNS)}")
 
-    split_index = int(len(df) * 0.8)
+    train_df, test_df, boundary = temporal_split(df)
+    print("\n===== TEMPORAL SPLIT (80/20 by time) =====")
+    print(f"Split at: {boundary['boundary']}")
+    describe_split("Train (earlier)", train_df)
+    describe_split("Test  (later) ", test_df)
+    shared_accounts = set(train_df["accountId"]) & set(test_df["accountId"])
+    print(f"Accounts represented on both sides: {len(shared_accounts)}")
 
-    train_df = df.iloc[:split_index]
-    test_df = df.iloc[split_index:]
+    print("\n===== SINGLE-FEATURE LEAKAGE AUDIT =====")
+    audit = audit_feature_leakage(df, FEATURE_COLUMNS)
+    if not audit["suspicious_auc"] and not audit["suspicious_categories"]:
+        print("No single feature separates the classes on its own.")
+    for feature, auc in audit["suspicious_auc"]:
+        print(f"  suspicious AUC: {feature} -> {auc}")
+    for feature, value, support, rate in audit["suspicious_categories"]:
+        print(f"  pure category: {feature}={value} support {support} fraud rate {rate}")
 
-    print(f"Training transactions: {len(train_df)}")
-    print(f"Testing transactions: {len(test_df)}")
-
-    feature_columns = [
-        "amount",
-        "transactionHour",
-        "isNightTransaction",
-        "isHighValue",
-        "transactionCount",
-        "averageAmount",
-        "previousMaximumAmount",
-        "amountDeviation",
-        "transactionsLastHour",
-        "transactionsLast24Hours",
-        "amountLastHour",
-        "transactionType",
-        "location"
-    ]
-
-    target_column = "fraudLabel"
-
-    X_train = train_df[feature_columns]
-    y_train = train_df[target_column]
-    X_test = test_df[feature_columns]
-    y_test = test_df[target_column]
-
-    categorical_features = [
-        "transactionType",
-        "location"
-    ]
-
-    numerical_features = [
-        "amount",
-        "transactionHour",
-        "isNightTransaction",
-        "isHighValue",
-        "transactionCount",
-        "averageAmount",
-        "previousMaximumAmount",
-        "amountDeviation",
-        "transactionsLastHour",
-        "transactionsLast24Hours",
-        "amountLastHour"
-    ]
-
-    preprocessor = ColumnTransformer(
-        transformers=[
-            (
-                "categorical",
-                OneHotEncoder(
-                    handle_unknown="ignore"
-                ),
-                categorical_features
-            ),
-            (
-                "numerical",
-                "passthrough",
-                numerical_features
-            )
-        ]
-    )
-
-    X_train_processed = preprocessor.fit_transform(X_train)
-    X_test_processed = preprocessor.transform(X_test)
-
-    print(
-        f"Processed training shape: "
-        f"{X_train_processed.shape}"
-    )
-    print(
-        f"Processed testing shape: "
-        f"{X_test_processed.shape}"
-    )
-
-    model = RandomForestClassifier(
-        n_estimators=200,
-        random_state=42,
-        class_weight="balanced",
-        n_jobs=-1
-    )
-
-    print("\nTraining Random Forest...")
-    model.fit(
-        X_train_processed,
-        y_train
-    )
-    print("Training completed.")
-
-    predictions = model.predict(
-        X_test_processed
-    )
-    probabilities = model.predict_proba(
-        X_test_processed
-    )[:, 1]
-
-    print("\n===== CONFUSION MATRIX =====")
-    print(
-        confusion_matrix(y_test, predictions)
-    )
-
-    print("\n===== CLASSIFICATION REPORT =====")
-    print(
-        classification_report(y_test, predictions, digits=4)
-    )
-
-    print("\n===== ROC-AUC =====")
-    auc = roc_auc_score(y_test, probabilities)
-    print(f"ROC-AUC: {auc:.4f}")
+    print("\nTraining Random Forest on the earlier transactions...")
+    result = fit_and_score(train_df, test_df, FEATURE_COLUMNS, verbose=True)
+    ranked = sorted(
+        zip(result["feature_names"], result["model"].feature_importances_),
+        key=lambda pair: pair[1],
+        reverse=True,
+    )[:8]
+    print("\nTop transformed features by impurity reduction:")
+    for name, value in ranked:
+        print(f"  {name}: {value:.4f}")
+    print("\nReminder: synthetic data, research prototype, not a production model.")
 
 
 if __name__ == "__main__":
