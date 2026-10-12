@@ -8,6 +8,7 @@ import accountRoutes from "./routes/account.routes.js";
 import transactionRoutes from "./routes/transaction.routes.js";
 import documentRoutes from "./routes/document.routes.js";
 import evidenceRoutes from "./routes/evidence.routes.js";
+import analyticsRoutes from "./routes/analytics.routes.js";
 import { notFoundHandler, errorHandler } from "./middleware/error.middleware.js";
 
 const app = express();
@@ -31,6 +32,7 @@ app.use("/api/v1/cases/:caseId/accounts", accountRoutes);
 app.use("/api/v1/cases/:caseId/transactions", transactionRoutes);
 app.use("/api/v1/cases/:caseId/documents", documentRoutes);
 app.use("/api/v1/cases/:caseId/evidence", evidenceRoutes);
+app.use("/api/v1/cases/:caseId/analytics", analyticsRoutes);
 
 // NOTE: the document storage directory is intentionally NOT mounted with
 // express.static - uploaded files are only reachable through the
