@@ -1,0 +1,52 @@
+{
+  "winner": "xgb_full",
+  "threshold": 0.95,
+  "reason": "best individual by validation PR-AUC; ensemble gain < 0.02",
+  "xgb_config": {
+    "max_depth": 10,
+    "learning_rate": 0.05,
+    "n_estimators": 600,
+    "scale_pos_weight": 158.75461690842866,
+    "early_stopping_rounds": 50
+  },
+  "full_train_rows": 5000000,
+  "train_sample_cap": 5000000,
+  "seed": 42,
+  "validation_ranking": [
+    [
+      "xgb_full",
+      0.7141380788648933,
+      "Boost"
+    ],
+    [
+      "soft_vote_xgb_hgb",
+      0.7077542637108746,
+      "Ensemble"
+    ],
+    [
+      "hgb_full",
+      0.6852908563309267,
+      "Boost"
+    ]
+  ],
+  "candidates": {
+    "xgb_full": {
+      "pr_auc": 0.7141380788648933,
+      "roc_auc": 0.9905507673208558,
+      "f1@thr": 0.6310306337591467,
+      "family": "Boost"
+    },
+    "hgb_full": {
+      "pr_auc": 0.6852908563309267,
+      "roc_auc": 0.9894770278984465,
+      "f1@thr": 0.5481447155009764,
+      "family": "Boost"
+    },
+    "soft_vote_xgb_hgb": {
+      "pr_auc": 0.7077542637108746,
+      "roc_auc": 0.9906084203980277,
+      "f1@thr": 0.6156921147515284,
+      "family": "Ensemble"
+    }
+  }
+}

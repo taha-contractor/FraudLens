@@ -49,6 +49,8 @@ export async function createTransaction(authenticatedUser, caseId, data) {
             location: data.location || "",
             timestamp: parseTimestampValue(data.timestamp),
             status: data.status || "PENDING",
+            // Optional model input; absent stays undefined (scored as 0.0 + gap).
+            oldbalanceOrg: data.oldbalanceOrg,
         });
     } catch (error) {
         if (error.code === 11000) {

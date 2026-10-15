@@ -10,6 +10,32 @@ FraudLens is designed as a B.Tech major project and focuses on a practical, modu
 
 The investigator remains the final decision-maker. AI and ML components assist the investigation but do not make final fraud or legal decisions.
 
+### 1.1 Implementation status (as of the current build)
+
+This document is the full architecture **blueprint**. Only part of it is implemented.
+
+**Implemented:**
+
+- React + Tailwind investigation UI (login, dashboard, transaction explorer/details, cases,
+  case workspace, analytics, model information).
+- Node.js + Express API with JWT authentication and strict **case isolation**.
+- MongoDB persistence for cases, accounts, transactions, documents, evidence and risk.
+- **Python FastAPI ML inference service** serving the winning **XGBoost** model, reusing the
+  causal feature builder from `ml/` (17-feature strictly-prior contract).
+- **Transaction risk assessment** integrated into the workflow: scores mapped to HIGH/MEDIUM/LOW
+  at threshold 0.95 and persisted per transaction, plus explainable rule signals and read-only
+  analytics (summary, timeline, suspicious, account activity).
+
+**Planned / not yet implemented (design only):**
+
+- **Retrieval-Augmented Generation (RAG)**, **LLM-assisted investigation** and its controlled
+  tools, **OCR** of scanned documents, entity resolution, relationship/fund-flow graphs,
+  automatic timeline construction, and report generation. Sections that describe these are
+  target architecture, not current behaviour.
+
+See [`ml/README.md`](../ml/README.md), [`ml-service/README.md`](../ml-service/README.md) and
+[`docs/ML_Dataset_and_Features.md`](ML_Dataset_and_Features.md) for the implemented ML layer.
+
 ---
 
 ## 2. Architecture Objectives
@@ -283,6 +309,19 @@ Example:
     - Unusual transaction time
 
 ML output is considered an investigation signal and not final proof of fraud.
+
+### 10.1 Implemented ML layer
+
+The ML actually shipped with FraudLens is the **XGBoost** classifier selected in the `ml/`
+PaySim pipeline, served read-only by the **FastAPI inference service** (`ml-service/`). It
+consumes a fixed **17-feature** vector whose nine history/velocity features are rebuilt by a
+**strictly-prior causal pass** reused from `ml/src`, so online scoring cannot leak or drift
+from training. The backend projects an already case-scoped transaction set to the service and
+persists `riskScore` / `riskLevel` / `modelPrediction` plus the feature vector on each
+transaction. The feature names listed above (`transactionHour`, `isNightTransaction`,
+`isHighValue`, …) belong to the **explainable rule / analytics layer**, which runs alongside
+the model; they are not the model's feature vector. RAG- and LLM-based analysis described
+later in this document is planned, not implemented.
 
 ---
 
@@ -967,11 +1006,12 @@ Semester 8 extends the prototype with:
 | Backend | Node.js + Express |
 | Database | MongoDB |
 | ML / Analytics | Python |
-| ML Library | Scikit-learn |
-| Document Processing | PDF Processing Libraries |
-| OCR | Tesseract |
-| RAG | Retrieval + LLM |
-| AI Investigation | LLM + Controlled Tools |
+| ML Model | XGBoost (`XGBClassifier`) |
+| ML Inference Service | FastAPI + Uvicorn (loads the model once; reuses `ml/src` causal features) |
+| Document Processing | PDF processing libraries (planned) |
+| OCR | Tesseract (planned) |
+| RAG | Retrieval + LLM (planned) |
+| AI Investigation | LLM + controlled tools (planned) |
 | API Testing | Postman |
 | Version Control | Git + GitHub |
 

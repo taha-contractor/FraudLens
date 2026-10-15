@@ -1,0 +1,31 @@
+{
+  "chain_split_keys": ["chain_id", "nameOrig", "nameDest"],
+  "config_version": "cfg-default-v1",
+  "dataset_version": "enhanced-v1",
+  "fraud_rate_by_type": {
+    "CASH_IN": 0.01,
+    "CASH_OUT": 0.05,
+    "DEBIT": 0.03,
+    "PAYMENT": 0.01,
+    "TRANSFER": 0.06
+  },
+  "generated_rows": 2000000,
+  "generator_version": "0.1.0",
+  "ledger_tolerance": 0.01,
+  "master_seed": 42,
+  "min_per_scenario_count": 200,
+  "n_dest_accounts": 80000,
+  "n_origin_accounts": 200000,
+  "output_format": "csv",
+  "overall_fraud_rate": 0.03,
+  "step_end": 743,
+  "step_start": 1,
+  "substep_resolution": "second",
+  "type_weights": {
+    "CASH_IN": 0.24,
+    "CASH_OUT": 0.22,
+    "DEBIT": 0.12,
+    "PAYMENT": 0.24,
+    "TRANSFER": 0.18
+  }
+}

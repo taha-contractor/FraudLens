@@ -1,0 +1,10 @@
+# FraudLens ML inference service — pinned to the model stack that produced
+# winner_model.joblib (exact versions guarantee the artifact deserializes).
+fastapi==0.143.2
+uvicorn[standard]==0.32.1
+pydantic==2.10.4
+scikit-learn==1.9.0
+xgboost==3.4.1
+joblib==1.5.3
+numpy==2.5.2
+httpx==0.28.1  # fastapi TestClient (run_tests.py)

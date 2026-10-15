@@ -8,6 +8,11 @@ __pycache__/
 dist/
 build/
 .vscode/
-server/uploads/
-ml/data/*.csv
+backend/uploads/
 ~$*
+
+# FraudLens ML data: large raw source + generated data outputs (data only).
+# Source code, tests, configs, reports and *.json manifests stay TRACKED.
+ml/data/raw/*.csv
+ml/data/processed/**/*.csv
+ml/data/splits/*.csv

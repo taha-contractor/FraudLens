@@ -1,0 +1,76 @@
+{
+  "config_version": "cfg-default-v1",
+  "counts": {
+    "generated_chain_fraud": 20000,
+    "generated_fraud": 60400,
+    "generated_fraud_rate": 0.0302,
+    "generated_rows": 2000000,
+    "original_flagged": 16,
+    "original_fraud": 8213,
+    "original_rows": 6362620,
+    "provenance_written": 8362620,
+    "transactions_written": 8362620
+  },
+  "dataset_version": "enhanced-v1",
+  "expected_fraud_rate": 0.0302,
+  "files": {
+    "provenance": "ml\\data\\processed\\enhanced_full\\provenance.csv",
+    "transactions": "ml\\data\\processed\\enhanced_full\\enhanced_transactions.csv"
+  },
+  "generated_fraud_by_type": {
+    "CASH_IN": 4800,
+    "CASH_OUT": 22000,
+    "DEBIT": 7200,
+    "PAYMENT": 4800,
+    "TRANSFER": 21600
+  },
+  "generated_scenario_counts": {
+    "CIN-F1": 2400,
+    "CIN-F2": 2400,
+    "CIN-L1": 237600,
+    "CIN-L2": 237600,
+    "COUT-F1": 9000,
+    "COUT-F2": 9000,
+    "COUT-F3": 4000,
+    "COUT-L1": 209000,
+    "COUT-L2": 209000,
+    "DEB-F1": 3600,
+    "DEB-F2": 3600,
+    "DEB-L1": 116400,
+    "DEB-L2": 116400,
+    "PAY-F1": 2400,
+    "PAY-F2": 2400,
+    "PAY-L1": 158400,
+    "PAY-L2": 158400,
+    "PAY-L3": 158400,
+    "TRF-F1": 8867,
+    "TRF-F2": 3867,
+    "TRF-F3": 8866,
+    "TRF-L1": 169200,
+    "TRF-L2": 169200
+  },
+  "generated_type_counts": {
+    "CASH_IN": 480000,
+    "CASH_OUT": 440000,
+    "DEBIT": 240000,
+    "PAYMENT": 480000,
+    "TRANSFER": 360000
+  },
+  "generation_run_id": "run-82c30400e37cd355",
+  "generator_version": "0.1.0",
+  "include_original": "all",
+  "master_seed": 42,
+  "original_type_counts": {
+    "CASH_IN": 1399284,
+    "CASH_OUT": 2237500,
+    "DEBIT": 41432,
+    "PAYMENT": 2151495,
+    "TRANSFER": 532909
+  },
+  "output_format": "csv",
+  "source_fingerprint": {
+    "path": "ml\\data\\raw\\PS_20174392719_1491204439457_log.csv",
+    "sha256": "16910F90577B0D981BF8FF289714510BB89BC71BFF7D3F220F024E287E4EEA6B",
+    "size_bytes": 493534783
+  }
+}

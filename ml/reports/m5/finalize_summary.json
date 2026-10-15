@@ -1,0 +1,30 @@
+{
+  "total_wall_s": 365.8,
+  "winner": "xgb_full",
+  "threshold": 0.95,
+  "final_test": {
+    "rows": 337071,
+    "pr_auc": 0.6475586158133574,
+    "roc_auc": 0.9845215157741654,
+    "threshold": 0.95,
+    "precision": 0.359748752366202,
+    "recall": 0.9199119911991199,
+    "f1": 0.5172264489391971,
+    "true_positives": 8362,
+    "false_positives": 14882,
+    "false_negatives": 728,
+    "true_negatives": 313099,
+    "fpr": 0.045374579625039255,
+    "flag_rate": 0.06895876536397376,
+    "accuracy": 0.9536892820800366,
+    "infer_s_on_test": 0.825,
+    "infer_ms_per_1k_rows": 2.447
+  },
+  "unseen": {
+    "pr_auc": 0.593804295712658,
+    "recall": 0.7186249814787375,
+    "precision": 0.4379034806555009,
+    "f1": 0.5441947880725967
+  },
+  "full_train_rows": 5000000
+}

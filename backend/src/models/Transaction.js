@@ -92,7 +92,16 @@ const transactionSchema = new mongoose.Schema(
             enum: { values: TRANSACTION_STATUSES, message: "Invalid status: {VALUE}" },
             default: "PENDING",
         },
-        // Analytical fields — populated only by later ML/analytics milestones.
+        // Optional origin account balance immediately BEFORE the transaction.
+        // The model's 17-feature contract includes oldbalanceOrg; generic
+        // ingestion may not carry it, so it is optional and defaults to 0.0 at
+        // scoring time (surfaced as a documented feature gap, never guessed).
+        oldbalanceOrg: {
+            type: Number,
+            min: 0,
+            default: undefined,
+        },
+        // Analytical fields — populated only by the ML inference milestone.
         riskScore: {
             type: Number,
             min: 0,
@@ -106,6 +115,13 @@ const transactionSchema = new mongoose.Schema(
         },
         modelPrediction: {
             type: Boolean,
+            default: undefined,
+        },
+        // Full assessment written by the ML milestone for explainability and
+        // traceability (feature values, mapped type, threshold, provenance).
+        // Not client-settable; paired with the risk fields above.
+        assessment: {
+            type: mongoose.Schema.Types.Mixed,
             default: undefined,
         },
     },
@@ -124,6 +140,9 @@ transactionSchema.set("toJSON", {
         ret.caseId = ret.caseId.toString();
         delete ret._id;
         delete ret.__v;
+        // The full assessment (feature vectors, provenance) is heavy and only
+        // relevant in the detail view; it is served by the risk endpoint.
+        delete ret.assessment;
         return ret;
     },
 });

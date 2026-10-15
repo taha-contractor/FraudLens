@@ -29,8 +29,8 @@ export function validateTransactionCreation(body) {
             errors.push(`${field} cannot be supplied`);
         }
     }
-    // Analytical fields are reserved for later ML/analytics milestones.
-    for (const field of ["riskScore", "riskLevel", "modelPrediction"]) {
+    // Analytical fields are written by the ML inference layer, never by clients.
+    for (const field of ["riskScore", "riskLevel", "modelPrediction", "assessment"]) {
         if (body[field] !== undefined) {
             errors.push(`${field} is set by the analytics layer, not by clients`);
         }
@@ -67,6 +67,13 @@ export function validateTransactionCreation(body) {
 
     if (body.status !== undefined && !TRANSACTION_STATUSES.includes(body.status)) {
         errors.push(`status must be one of: ${TRANSACTION_STATUSES.join(", ")}`);
+    }
+
+    // Optional model input: origin balance before the transaction, when known.
+    if (body.oldbalanceOrg !== undefined && body.oldbalanceOrg !== null) {
+        if (typeof body.oldbalanceOrg !== "number" || !Number.isFinite(body.oldbalanceOrg) || body.oldbalanceOrg < 0) {
+            errors.push("oldbalanceOrg, when supplied, must be a non-negative number");
+        }
     }
 
     for (const field of ["description", "merchant", "location"]) {

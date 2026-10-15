@@ -1,0 +1,26 @@
+{
+  "rows": 8362620,
+  "generated": 2000000,
+  "original": 6362620,
+  "unique_origins": 6553221,
+  "unique_dests": 3051541,
+  "columns": [
+    "record_uid",
+    "record_origin",
+    "step",
+    "type",
+    "amount",
+    "oldbalanceOrg",
+    "nameDest",
+    "isFraud",
+    "origin_txn_count_prev",
+    "origin_avg_amount_prev",
+    "origin_amount_dev_prev",
+    "origin_time_since_prev_txn",
+    "origin_txn_last24h",
+    "origin_amount_last24h",
+    "origin_unique_dests_last24h",
+    "dest_txn_count_prev",
+    "dest_unique_origins_prev"
+  ]
+}
